@@ -1,26 +1,280 @@
+/* VSCode Dark Theme - Card Game Study Guide */
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* VSCode Dark Theme Colors */
+  --vs-background: #1e1e1e;
+  --vs-foreground: #d4d4d4;
+  --vs-selection: #264f78;
+  --vs-selection-background: #264f78;
+  --vs-focus-border: #007acc;
+  --vs-text: #d4d4d4;
+  --vs-text-disabled: #6a9955;
+  --vs-text-link: #4ec9b0;
+  --vs-text-link-active: #4ec9b0;
+  --vs-text-link-hover: #4ec9b0;
+  --vs-text-preformat: #d4d4d4;
+  --vs-text-quote: #6a9955;
+  --vs-text-blockquote: #6a9955;
+  --vs-text-code: #d4d4d4;
+  --vs-text-separator: #6a9955;
+  --vs-text-invalid: #f44747;
+  --vs-text-error: #f44747;
+  --vs-text-warning: #cca700;
+  --vs-text-info: #75beff;
+  --vs-text-debug: #75beff;
+  --vs-text-verbose: #75beff;
+  --vs-text-deprecated: #6a9955;
+  --vs-text-ignored: #6a9955;
+  --vs-text-unused: #6a9955;
+  --vs-text-meta: #6a9955;
+  --vs-text-secondary: #6a9955;
+  --vs-text-description: #6a9955;
+  --vs-text-value: #9cdcfe;
+  --vs-text-constant: #4fc1ff;
+  --vs-text-variable: #9cdcfe;
+  --vs-text-keyword: #569cd6;
+  --vs-text-operator: #d4d4d4;
+  --vs-text-function: #dcdcaa;
+  --vs-text-string: #ce9178;
+  --vs-text-number: #b5cea8;
+  --vs-text-regexp: #d16969;
+  --vs-text-comment: #6a9955;
+  --vs-text-class: #4ec9b0;
+  --vs-text-interface: #4ec9b0;
+  --vs-text-namespace: #4ec9b0;
+  --vs-text-property: #9cdcfe;
+  --vs-text-event: #dcdcaa;
+  --vs-text-tag: #569cd6;
+  --vs-text-attribute: #9cdcfe;
+  --vs-text-modifier: #569cd6;
+  --vs-text-unit: #b5cea8;
+  --vs-text-snippet: #6a9955;
+  --vs-text-placeholder: #6a9955;
+  --vs-text-invalid: #f44747;
+  --vs-text-error: #f44747;
+  --vs-text-warning: #cca700;
+  --vs-text-info: #75beff;
+  --vs-text-debug: #75beff;
+  --vs-text-verbose: #75beff;
+  --vs-text-deprecated: #6a9955;
+  --vs-text-ignored: #6a9955;
+  --vs-text-unused: #6a9955;
+  --vs-text-meta: #6a9955;
+  --vs-text-secondary: #6a9955;
+  --vs-text-description: #6a9955;
+  --vs-text-value: #9cdcfe;
+  --vs-text-constant: #4fc1ff;
+  --vs-text-variable: #9cdcfe;
+  --vs-text-keyword: #569cd6;
+  --vs-text-operator: #d4d4d4;
+  --vs-text-function: #dcdcaa;
+  --vs-text-string: #ce9178;
+  --vs-text-number: #b5cea8;
+  --vs-text-regexp: #d16969;
+  --vs-text-comment: #6a9955;
+  --vs-text-class: #4ec9b0;
+  --vs-text-interface: #4ec9b0;
+  --vs-text-namespace: #4ec9b0;
+  --vs-text-property: #9cdcfe;
+  --vs-text-event: #dcdcaa;
+  --vs-text-tag: #569cd6;
+  --vs-text-attribute: #9cdcfe;
+  --vs-text-modifier: #569cd6;
+  --vs-text-unit: #b5cea8;
+  --vs-text-snippet: #6a9955;
+  --vs-text-placeholder: #6a9955;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--vs-background);
+  color: var(--vs-foreground);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+.app-container {
+  min-height: 100vh;
+  background-color: var(--vs-background);
+}
+
+/* App Header */
+.app-header {
+  background-color: var(--vs-background);
+  border-bottom: 1px solid #3c3c3c;
+  padding: 1rem 2rem;
+  text-align: center;
+}
+
+.app-header h1 {
+  color: var(--vs-text);
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.app-header p {
+  color: var(--vs-text-secondary);
+  font-size: 1.1rem;
+}
+
+/* Navigation */
+.app-nav {
+  background-color: var(--vs-background);
+  border-bottom: 1px solid #3c3c3c;
+  padding: 1rem 2rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.nav-btn {
+  background-color: #2d2d30;
+  color: var(--vs-text);
+  border: 1px solid #3c3c3c;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.nav-btn:hover {
+  background-color: #3c3c3c;
+  border-color: var(--vs-focus-border);
+}
+
+.nav-btn.active {
+  background-color: var(--vs-focus-border);
+  color: white;
+  border-color: var(--vs-focus-border);
+}
+
+/* Main Content */
+.app-main {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.content-section {
+  display: none;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.content-section.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.section-header h2 {
+  color: var(--vs-text);
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.section-header p {
+  color: var(--vs-text-secondary);
+  font-size: 1.1rem;
+}
+
+/* Concept Cards */
+.concept-card {
+  background-color: #2d2d30;
+  border: 1px solid #3c3c3c;
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.concept-card h3 {
+  color: var(--vs-text-class);
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--vs-focus-border);
+  padding-bottom: 0.5rem;
+}
+
+/* Code Blocks */
+.code-block {
+  background-color: #1e1e1e;
+  border: 1px solid #3c3c3c;
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 1rem 0;
+}
+
+.code-header {
+  background-color: #3c3c3c;
+  color: var(--vs-text);
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  border-bottom: 1px solid #3c3c3c;
+}
+
+.code-block pre {
+  margin: 0;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.code-block code {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--vs-text);
+}
+
+/* Syntax Highlighting */
+.javascript .keyword { color: var(--vs-text-keyword); }
+.javascript .string { color: var(--vs-text-string); }
+.javascript .number { color: var(--vs-text-number); }
+.javascript .function { color: var(--vs-text-function); }
+.javascript .comment { color: var(--vs-text-comment); }
+.javascript .operator { color: var(--vs-text-operator); }
+.javascript .variable { color: var(--vs-text-variable); }
+.javascript .property { color: var(--vs-text-property); }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .app-header h1 {
+    font-size: 2rem;
+  }
+  
+  .app-nav {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .nav-btn {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .app-main {
+    padding: 1rem;
+  }
+  
+  .concept-card {
+    padding: 1.5rem;
+  }
 }

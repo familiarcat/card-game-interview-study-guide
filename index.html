@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Game Interview Study Guide</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>🎯 Card Game Interview Study Guide</h1>
+            <p>Master in 24 Hours, Execute in 10 Minutes</p>
+        </header>
+
+        <nav class="app-nav">
+            <button class="nav-btn active" data-section="study">📚 Study Guide</button>
+            <button class="nav-btn" data-section="practice">🧪 Practice Tests</button>
+            <button class="nav-btn" data-section="timed">⏱️ Timed Challenge</button>
+            <button class="nav-btn" data-section="review">📖 Code Review</button>
+            <button id="debug-highlight" style="background: #f44747; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">🔍 Debug Highlight</button>
+            <button id="test-highlight" style="background: #4ec9b0; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; margin-left: 0.5rem;">🧪 Test Highlight</button>
+        </nav>
+
+        <main class="app-main">
+            <!-- Study Guide Section -->
+            <section id="study" class="content-section active">
+                <div class="section-header">
+                    <h2>📚 Complete Study Guide</h2>
+                    <p>Master all concepts, algorithms, and patterns</p>
+                </div>
+
+                <div class="study-content">
+                    <div class="concept-card">
+                        <h3>🎴 Card Representation Patterns</h3>
+                        <div class="code-block">
+                            <div class="code-header">Standard Card Representations</div>
+                            <pre><code class="javascript">// Standard representations you'll encounter:
+const card1 = [14, 'S']; // [value, suit] - Ace of Spades
+const card2 = {value: 14, suit: 'S'}; // Object notation
+const card3 = 'AS'; // String notation (convert to vector)
+
+// Hand as multidimensional array:
+const hand = [[14,'S'], [13,'H'], [12,'D'], [11,'C'], [10,'S']];</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="concept-card">
+                        <h3>🔧 Key Vector Operations</h3>
+                        <div class="code-block">
+                            <div class="code-header">Essential Vector Manipulation</div>
+                            <pre><code class="javascript">// 1. Extract values only
+const values = hand.map(card => card[0]);
+// [14, 13, 12, 11, 10]
+
+// 2. Extract suits only  
+const suits = hand.map(card => card[1]);
+// ['S', 'H', 'D', 'C', 'S']
+
+// 3. Group by suit (critical pattern)
+const suitGroups = hand.reduce((acc, card) => {
+  const suit = card[1];
+  if (!acc[suit]) acc[suit] = [];
+  acc[suit].push(card[0]);
+  return acc;
+}, {});</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="concept-card">
+                        <h3>⚡ Algorithm 1: Hand Evaluation</h3>
+                        <div class="code-block">
+                            <div class="code-header">Core Hand Evaluation Logic</div>
+                            <pre><code class="javascript">function evaluateHand(hand) {
+  const values = hand.map(card => card[0]).sort((a, b) => b - a);
+  const suits = hand.map(card => card[1]);
+  const suitCounts = suits.reduce((acc, suit) => {
+    acc[suit] = (acc[suit] || 0) + 1;
+    return acc;
+  }, {});
+  
+  const valueCounts = values.reduce((acc, val) => {
+    acc[val] = (acc[val] || 0) + 1;
+    return acc;
+  }, {});
+  
+  const counts = Object.values(valueCounts).sort((a, b) => b - a);
+  const isFlush = Object.keys(suitCounts).length === 1;
+  const isStraight = isConsecutive(values);
+  
+  // Return hand strength vector [type, highCard, kickers...]
+  if (isFlush && isStraight) return [8, Math.max(...values)];
+  if (counts[0] === 4) return [7, getValueByCount(valueCounts, 4)];
+  if (counts[0] === 3 && counts[1] === 2) return [6, getValueByCount(valueCounts, 3)];
+  if (isFlush) return [5, ...values];
+  if (isStraight) return [4, Math.max(...values)];
+  if (counts[0] === 3) return [3, getValueByCount(valueCounts, 3)];
+  if (counts[0] === 2 && counts[1] === 2) return [2, ...getTwoPairValues(valueCounts)];
+  if (counts[0] === 2) return [1, getValueByCount(valueCounts, 2)];
+  return [0, ...values];
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="concept-card">
+                        <h3>🎯 Algorithm 2: Optimal Hand Selection</h3>
+                        <div class="code-block">
+                            <div class="code-header">Finding Best Possible Hand</div>
+                            <pre><code class="javascript">function findBestHand(cards, handSize = 5) {
+  const combinations = getCombinations(cards, handSize);
+  let bestHand = null;
+  let bestScore = [-1];
+  
+  for (const combo of combinations) {
+    const score = evaluateHand(combo);
+    if (compareHands(score, bestScore) > 0) {
+      bestHand = combo;
+      bestScore = score;
+    }
+  }
+  
+  return { hand: bestHand, score: bestScore };
+}
+
+function getCombinations(arr, r) {
+  if (r === 1) return arr.map(item => [item]);
+  const result = [];
+  arr.forEach((item, i) => {
+    const rest = arr.slice(i + 1);
+    const combos = getCombinations(rest, r - 1);
+    combos.forEach(combo => result.push([item, ...combo]));
+  });
+  return result;
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="concept-card">
+                        <h3>⚖️ Hand Comparison Algorithm</h3>
+                        <div class="code-block">
+                            <div class="code-header">Comparing Two Hand Scores</div>
+                            <pre><code class="javascript">function compareHands(hand1Score, hand2Score) {
+  for (let i = 0; i < Math.max(hand1Score.length, hand2Score.length); i++) {
+    const val1 = hand1Score[i] || 0;
+    const val2 = hand2Score[i] || 0;
+    if (val1 > val2) return 1;
+    if (val1 < val2) return -1;
+  }
+  return 0; // Tie
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="concept-card">
+                        <h3>🃏 Dealing Optimal Hands</h3>
+                        <div class="code-block">
+                            <div class="code-header">Deal Optimal Hands to N Players</div>
+                            <pre><code class="javascript">function dealOptimalHands(deck, numPlayers, handSize = 5) {
+  const players = Array(numPlayers).fill().map(() => []);
+  const remainingCards = [...deck];
+  
+  // Deal one card at a time to maintain fairness
+  for (let round = 0; round < handSize; round++) {
+    for (let player = 0; player < numPlayers; player++) {
+      if (remainingCards.length === 0) break;
+      
+      // Find best card for this player's current hand
+      const bestCardIndex = findBestCardForHand(
+        players[player], 
+        remainingCards, 
+        handSize - round - 1
+      );
+      
+      players[player].push(remainingCards.splice(bestCardIndex, 1)[0]);
+    }
+  }
+  
+  return players.map(hand => ({
+    hand,
+    score: evaluateHand(hand)
+  }));
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="concept-card">
+                        <h3>🛠️ Utility Functions</h3>
+                        <div class="code-block">
+                            <div class="code-header">Essential Helper Functions</div>
+                            <pre><code class="javascript">// Helper functions you'll need to memorize:
+const isConsecutive = (values) => {
+  const sorted = [...new Set(values)].sort((a, b) => a - b);
+  if (sorted.length < 5) return false;
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i] - sorted[i-1] !== 1) return false;
+  }
+  return true;
+};
+
+const getValueByCount = (counts, target) => {
+  return parseInt(Object.keys(counts).find(key => counts[key] === target));
+};
+
+const createDeck = () => {
+  const suits = ['S', 'H', 'D', 'C'];
+  const values = [2,3,4,5,6,7,8,9,10,11,12,13,14]; // J=11, Q=12, K=13, A=14
+  return suits.flatMap(suit => values.map(value => [value, suit]));
+};
+
+const shuffleDeck = (deck) => {
+  const shuffled = [...deck];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="concept-card">
+                        <h3>🧠 Memory Aids & Hand Rankings</h3>
+                        <div class="memory-aids">
+                            <div class="memory-item">
+                                <strong>Hand Rankings:</strong> Royal(8) > 4Kind(7) > Full(6) > Flush(5) > Straight(4) > 3Kind(3) > 2Pair(2) > Pair(1) > High(0)
+                            </div>
+                            <div class="memory-item">
+                                <strong>Vector Pattern:</strong> [handType, primaryValue, ...kickers]
+                            </div>
+                            <div class="memory-item">
+                                <strong>Reduction Pattern:</strong> Always use reduce for counting/grouping
+                            </div>
+                            <div class="memory-item">
+                                <strong>Combination Pattern:</strong> Recursive with slice(i+1)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Practice Tests Section -->
+            <section id="practice" class="content-section">
+                <div class="section-header">
+                    <h2>🧪 Practice Tests</h2>
+                    <p>Test your knowledge with interactive questions</p>
+                </div>
+
+                <div class="practice-content">
+                    <div class="test-question">
+                        <h3>Question 1: Hand Evaluation</h3>
+                        <p>What will this hand evaluate to?</p>
+                        <div class="code-block">
+                            <pre><code class="javascript">const hand = [[14,'S'], [14,'H'], [14,'D'], [10,'C'], [10,'S']];</code></pre>
+                        </div>
+                        <div class="options">
+                            <button class="option-btn" data-correct="true">Full House (Aces over Tens)</button>
+                            <button class="option-btn" data-correct="false">Three of a Kind</button>
+                            <button class="option-btn" data-correct="false">Two Pair</button>
+                            <button class="option-btn" data-correct="false">Flush</button>
+                        </div>
+                        <div class="explanation hidden">
+                            <strong>Correct!</strong> This is a Full House with three Aces and two Tens. The hand would return [6, 14, 10] where 6 is the Full House rank, 14 is the three-of-a-kind value, and 10 is the pair value.
+                        </div>
+                    </div>
+
+                    <div class="test-question">
+                        <h3>Question 2: Vector Operations</h3>
+                        <p>What does this code extract from a hand?</p>
+                        <div class="code-block">
+                            <pre><code class="javascript">const values = hand.map(card => card[0]);</code></pre>
+                        </div>
+                        <div class="options">
+                            <button class="option-btn" data-correct="false">The suits of all cards</button>
+                            <button class="option-btn" data-correct="true">The values/ranks of all cards</button>
+                            <button class="option-btn" data-correct="false">The first card only</button>
+                            <button class="option-btn" data-correct="false">The last card only</button>
+                        </div>
+                        <div class="explanation hidden">
+                            <strong>Correct!</strong> This extracts the values/ranks from each card. Since cards are represented as [value, suit], card[0] gets the value and card[1] gets the suit.
+                        </div>
+                    </div>
+
+                    <div class="test-question">
+                        <h3>Question 3: Algorithm Understanding</h3>
+                        <p>What is the time complexity of the getCombinations function?</p>
+                        <div class="options">
+                            <button class="option-btn" data-correct="false">O(n)</button>
+                            <button class="option-btn" data-correct="false">O(n log n)</button>
+                            <button class="option-btn" data-correct="true">O(C(n,r)) - Combination complexity</button>
+                            <button class="option-btn" data-correct="false">O(n²)</button>
+                        </div>
+                        <div class="explanation hidden">
+                            <strong>Correct!</strong> The getCombinations function generates all possible combinations of r elements from n elements, which is C(n,r) = n!/(r!(n-r)!). This is exponential complexity.
+                        </div>
+                    </div>
+
+                    <div class="test-question">
+                        <h3>Question 4: Edge Case Handling</h3>
+                        <p>What should the evaluateHand function return for an invalid input?</p>
+                        <div class="code-block">
+                            <pre><code class="javascript">evaluateHand(null); // or evaluateHand([]);</code></pre>
+                        </div>
+                        <div class="options">
+                            <button class="option-btn" data-correct="false">Throw an error</button>
+                            <button class="option-btn" data-correct="false">Return undefined</button>
+                            <button class="option-btn" data-correct="true">Return [0] (HIGH_CARD rank)</button>
+                            <button class="option-btn" data-correct="false">Return null</button>
+                        </div>
+                        <div class="explanation hidden">
+                            <strong>Correct!</strong> The function should handle invalid inputs gracefully by returning the lowest possible hand rank [0] rather than crashing or returning undefined.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Timed Challenge Section -->
+            <section id="timed" class="content-section">
+                <div class="section-header">
+                    <h2>⏱️ Timed Challenge</h2>
+                    <p>Test your speed - 10 minutes to implement!</p>
+                </div>
+
+                <div class="timed-content">
+                    <div class="timer-display">
+                        <div class="time-remaining">10:00</div>
+                        <button class="start-btn">Start Challenge</button>
+                        <button class="reset-btn hidden">Reset</button>
+                    </div>
+
+                    <div class="challenge-instructions">
+                        <h3>🎯 Challenge: Implement Hand Evaluation</h3>
+                        <p>You have 10 minutes to implement a function that evaluates a 5-card poker hand and returns its rank.</p>
+                        
+                        <div class="requirements">
+                            <h4>Requirements:</h4>
+                            <ul>
+                                <li>Function should take an array of 5 cards as input</li>
+                                <li>Each card is represented as [value, suit]</li>
+                                <li>Return format: [handRank, primaryValue, ...kickers]</li>
+                                <li>Handle all 9 hand types from High Card to Royal Flush</li>
+                                <li>Include proper error handling</li>
+                            </ul>
+                        </div>
+
+                        <div class="code-editor">
+                            <div class="editor-header">Your Implementation</div>
+                            <textarea id="challenge-code" placeholder="// Write your evaluateHand function here
+function evaluateHand(hand) {
+  // Your code here
+  // Remember: [handRank, primaryValue, ...kickers]
+}"></textarea>
+                        </div>
+
+                        <div class="test-cases">
+                            <h4>Test Cases:</h4>
+                            <div class="test-case">
+                                <strong>Royal Flush:</strong> [[14,'S'], [13,'S'], [12,'S'], [11,'S'], [10,'S']] → [8, 14]
+                            </div>
+                            <div class="test-case">
+                                <strong>Four of a Kind:</strong> [[14,'S'], [14,'H'], [14,'D'], [14,'C'], [10,'S']] → [7, 14, 10]
+                            </div>
+                            <div class="test-case">
+                                <strong>Full House:</strong> [[14,'S'], [14,'H'], [14,'D'], [10,'C'], [10,'S']] → [6, 14, 10]
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="challenge-results hidden">
+                        <h3>Results</h3>
+                        <div id="test-results"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Code Review Section -->
+            <section id="review" class="content-section">
+                <div class="section-header">
+                    <h2>📖 Complete Solution Review</h2>
+                    <p>Study the complete implementation with detailed explanations</p>
+                </div>
+
+                <div class="review-content">
+                    <div class="solution-section">
+                        <h3>🎯 Complete CardGameAnalyzer Class</h3>
+                        <div class="code-block">
+                            <div class="code-header">Main Class Structure</div>
+                            <pre><code class="javascript">class CardGameAnalyzer {
+  constructor() {
+    this.HAND_RANKS = {
+      STRAIGHT_FLUSH: 8,
+      FOUR_OF_A_KIND: 7,
+      FULL_HOUSE: 6,
+      FLUSH: 5,
+      STRAIGHT: 4,
+      THREE_OF_A_KIND: 3,
+      TWO_PAIR: 2,
+      PAIR: 1,
+      HIGH_CARD: 0
+    };
+  }
+
+  // Core function: Evaluate a 5-card hand
+  evaluateHand(hand) {
+    if (!hand || hand.length !== 5) return [this.HAND_RANKS.HIGH_CARD];
+    
+    const values = hand.map(card => card[0]).sort((a, b) => b - a);
+    const suits = hand.map(card => card[1]);
+    
+    const valueCounts = this.getValueCounts(values);
+    const suitCounts = this.getSuitCounts(suits);
+    const counts = Object.values(valueCounts).sort((a, b) => b - a);
+    
+    const isFlush = Object.keys(suitCounts).length === 1;
+    const isStraight = this.isStraight(values);
+    
+    // Evaluate from highest to lowest
+    if (isFlush && isStraight) {
+      return [this.HAND_RANKS.STRAIGHT_FLUSH, Math.max(...values)];
+    }
+    
+    if (counts[0] === 4) {
+      const fourValue = this.getValueByCount(valueCounts, 4);
+      const kicker = this.getValueByCount(valueCounts, 1);
+      return [this.HAND_RANKS.FOUR_OF_A_KIND, fourValue, kicker];
+    }
+    
+    if (counts[0] === 3 && counts[1] === 2) {
+      const threeValue = this.getValueByCount(valueCounts, 3);
+      const pairValue = this.getValueByCount(valueCounts, 2);
+      return [this.HAND_RANKS.FULL_HOUSE, threeValue, pairValue];
+    }
+    
+    if (isFlush) {
+      return [this.HAND_RANKS.FLUSH, ...values];
+    }
+    
+    if (isStraight) {
+      return [this.HAND_RANKS.STRAIGHT, Math.max(...values)];
+    }
+    
+    if (counts[0] === 3) {
+      const threeValue = this.getValueByCount(valueCounts, 3);
+      const kickers = values.filter(v => v !== threeValue);
+      return [this.HAND_RANKS.THREE_OF_A_KIND, threeValue, ...kickers];
+    }
+    
+    if (counts[0] === 2 && counts[1] === 2) {
+      const pairs = Object.keys(valueCounts)
+        .filter(k => valueCounts[k] === 2)
+        .map(Number)
+        .sort((a, b) => b - a);
+      const kicker = this.getValueByCount(valueCounts, 1);
+      return [this.HAND_RANKS.TWO_PAIR, pairs[0], pairs[1], kicker];
+    }
+    
+    if (counts[0] === 2) {
+      const pairValue = this.getValueByCount(valueCounts, 2);
+      const kickers = values.filter(v => v !== pairValue);
+      return [this.HAND_RANKS.PAIR, pairValue, ...kickers];
+    }
+    
+    return [this.HAND_RANKS.HIGH_CARD, ...values];
+  }</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="solution-section">
+                        <h3>🔍 Advanced Algorithms</h3>
+                        <div class="code-block">
+                            <div class="code-header">Optimal Hand Selection & Combinations</div>
+                            <pre><code class="javascript">  // Find best possible hand from available cards
+  findBestHand(cards, handSize = 5) {
+    if (cards.length < handSize) return null;
+    
+    const combinations = this.getCombinations(cards, handSize);
+    let bestHand = null;
+    let bestScore = [-1];
+    
+    for (const combo of combinations) {
+      const score = this.evaluateHand(combo);
+      if (this.compareHands(score, bestScore) > 0) {
+        bestHand = combo;
+        bestScore = score;
+      }
+    }
+    
+    return { hand: bestHand, score: bestScore };
+  }
+
+  // Generate all combinations of r elements from array
+  getCombinations(arr, r) {
+    if (r === 1) return arr.map(item => [item]);
+    
+    const result = [];
+    arr.forEach((item, i) => {
+      const rest = arr.slice(i + 1);
+      const combos = this.getCombinations(rest, r - 1);
+      combos.forEach(combo => result.push([item, ...combo]));
+    });
+    return result;
+  }</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="solution-section">
+                        <h3>🃏 Utility Functions</h3>
+                        <div class="code-block">
+                            <div class="code-header">Helper Methods & Deck Management</div>
+                            <pre><code class="javascript">  // Utility functions
+  getValueCounts(values) {
+    return values.reduce((acc, val) => {
+      acc[val] = (acc[val] || 0) + 1;
+      return acc;
+    }, {});
+  }
+
+  getSuitCounts(suits) {
+    return suits.reduce((acc, suit) => {
+      acc[suit] = (acc[suit] || 0) + 1;
+      return acc;
+    }, {});
+  }
+
+  getValueByCount(counts, target) {
+    return parseInt(Object.keys(counts).find(key => counts[key] === target));
+  }
+
+  isStraight(values) {
+    const unique = [...new Set(values)].sort((a, b) => a - b);
+    if (unique.length !== 5) return false;
+    
+    // Check for regular straight
+    for (let i = 1; i < unique.length; i++) {
+      if (unique[i] - unique[i-1] !== 1) {
+        // Check for Ace-low straight (A,2,3,4,5)
+        if (unique.join(',') === '2,3,4,5,14') return true;
+        return false;
+      }
+    }
+    return true;
+  }
+
+  createDeck() {
+    const suits = ['S', 'H', 'D', 'C'];
+    const values = [2,3,4,5,6,7,8,9,10,11,12,13,14];
+    return suits.flatMap(suit => values.map(value => [value, suit]));
+  }
+
+  shuffleDeck(deck) {
+    const shuffled = [...deck];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="solution-section">
+                        <h3>🧪 Complete Test Suite</h3>
+                        <div class="code-block">
+                            <div class="code-header">Jest Test Suite for All Hand Types</div>
+                            <pre><code class="javascript">// Jest Test Suite
+describe('CardGameAnalyzer', () => {
+  let analyzer;
+  let deck;
+
+  beforeEach(() => {
+    analyzer = new CardGameAnalyzer();
+    deck = analyzer.createDeck();
+  });
+
+  describe('Hand Evaluation', () => {
+    test('evaluates straight flush correctly', () => {
+      const hand = [[14,'S'], [13,'S'], [12,'S'], [11,'S'], [10,'S']]; // Royal flush
+      const result = analyzer.evaluateHand(hand);
+      expect(result[0]).toBe(analyzer.HAND_RANKS.STRAIGHT_FLUSH);
+      expect(result[1]).toBe(14);
+    });
+
+    test('evaluates four of a kind correctly', () => {
+      const hand = [[14,'S'], [14,'H'], [14,'D'], [14,'C'], [10,'S']];
+      const result = analyzer.evaluateHand(hand);
+      expect(result[0]).toBe(analyzer.HAND_RANKS.FOUR_OF_A_KIND);
+      expect(result[1]).toBe(14);
+      expect(result[2]).toBe(10); // Kicker
+    });
+
+    test('evaluates full house correctly', () => {
+      const hand = [[14,'S'], [14,'H'], [14,'D'], [10,'C'], [10,'S']];
+      const result = analyzer.evaluateHand(hand);
+      expect(result[0]).toBe(analyzer.HAND_RANKS.FULL_HOUSE);
+      expect(result[1]).toBe(14); // Three of a kind value
+      expect(result[2]).toBe(10); // Pair value
+    });
+
+    test('evaluates flush correctly', () => {
+      const hand = [[14,'S'], [12,'S'], [10,'S'], [8,'S'], [6,'S']];
+      const result = analyzer.evaluateHand(hand);
+      expect(result[0]).toBe(analyzer.HAND_RANKS.FLUSH);
+      expect(result.slice(1)).toEqual([14, 12, 10, 8, 6]);
+    });
+
+    test('evaluates straight correctly', () => {
+      const hand = [[14,'S'], [13,'H'], [12,'D'], [11,'C'], [10,'S']];
+      const result = analyzer.evaluateHand(hand);
+      expect(result[0]).toBe(analyzer.HAND_RANKS.STRAIGHT);
+      expect(result[1]).toBe(14);
+    });
+
+    test('evaluates Ace-low straight correctly', () => {
+      const hand = [[14,'S'], [5,'H'], [4,'D'], [3,'C'], [2,'S']];
+      const result = analyzer.evaluateHand(hand);
+      expect(result[0]).toBe(analyzer.HAND_RANKS.STRAIGHT);
+    });
+
+    test('evaluates three of a kind correctly', () => {
+      const hand = [[14,'S'], [14,'H'], [14,'D'], [10,'C'], [8,'S']];
+      const result = analyzer.evaluateHand(hand);
+      expect(result[0]).toBe(analyzer.HAND_RANKS.THREE_OF_A_KIND);
+      expect(result[1]).toBe(14);
+    });
+
+    test('evaluates two pair correctly', () => {
+      const hand = [[14,'S'], [14,'H'], [10,'D'], [10,'C'], [8,'S']];
+      const result = analyzer.evaluateHand(hand);
+      expect(result[0]).toBe(analyzer.HAND_RANKS.TWO_PAIR);
+      expect(result[1]).toBe(14); // Higher pair
+      expect(result[2]).toBe(10); // Lower pair
+      expect(result[3]).toBe(8);  // Kicker
+    });
+
+    test('evaluates one pair correctly', () => {
+      const hand = [[14,'S'], [14,'H'], [12,'D'], [10,'C'], [8,'S']];
+      const result = analyzer.evaluateHand(hand);
+      expect(result[0]).toBe(analyzer.HAND_RANKS.PAIR);
+      expect(result[1]).toBe(14); // Pair value
+    });
+
+    test('evaluates high card correctly', () => {
+      const hand = [[14,'S'], [12,'H'], [10,'D'], [8,'C'], [6,'S']];
+      const result = analyzer.evaluateHand(hand);
+      expect(result[0]).toBe(analyzer.HAND_RANKS.HIGH_CARD);
+      expect(result.slice(1)).toEqual([14, 12, 10, 8, 6]);
+    });
+  });
+
+  describe('Hand Comparison', () => {
+    test('compares different hand ranks correctly', () => {
+      const flush = analyzer.evaluateHand([[14,'S'], [12,'S'], [10,'S'], [8,'S'], [6,'S']]);
+      const straight = analyzer.evaluateHand([[14,'H'], [13,'D'], [12,'C'], [11,'S'], [10,'H']]);
+      expect(analyzer.compareHands(flush, straight)).toBe(1);
+    });
+
+    test('compares same hand ranks by high cards', () => {
+      const highFlush = analyzer.evaluateHand([[14,'S'], [13,'S'], [11,'S'], [9,'S'], [7,'S']]);
+      const lowFlush = analyzer.evaluateHand([[14,'H'], [13,'H'], [11,'H'], [9,'H'], [6,'H']]);
+      expect(analyzer.compareHands(highFlush, lowFlush)).toBe(1);
+    });
+
+    test('identifies ties correctly', () => {
+      const hand1 = analyzer.evaluateHand([[14,'S'], [13,'H'], [12,'D'], [11,'C'], [10,'S']]);
+      const hand2 = analyzer.evaluateHand([[14,'H'], [13,'D'], [12,'C'], [11,'S'], [10,'H']]);
+      expect(analyzer.compareHands(hand1, hand2)).toBe(0);
+    });
+  });
+
+  describe('Best Hand Selection', () => {
+    test('finds best hand from 7 cards', () => {
+      const cards = [
+        [14,'S'], [13,'S'], [12,'S'], [11,'S'], [10,'S'], // Royal flush
+        [9,'H'], [8,'H'] // Extra cards
+      ];
+      const result = analyzer.findBestHand(cards, 5);
+      expect(result.score[0]).toBe(analyzer.HAND_RANKS.STRAIGHT_FLUSH);
+      expect(result.hand).toHaveLength(5);
+    });
+
+    test('returns null for insufficient cards', () => {
+      const cards = [[14,'S'], [13,'H'], [12,'D']];
+      const result = analyzer.findBestHand(cards, 5);
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('Dealing Hands', () => {
+    test('deals correct number of hands', () => {
+      const result = analyzer.dealOptimalHands(deck, 4, 5);
+      expect(result).toHaveLength(4);
+      expect(result[0].hand).toHaveLength(5);
+      expect(result[0]).toHaveProperty('score');
+      expect(result[0]).toHaveProperty('rank');
+    });
+
+    test('returns null for insufficient deck', () => {
+      const smallDeck = deck.slice(0, 10);
+      const result = analyzer.dealOptimalHands(smallDeck, 4, 5);
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('Utility Functions', () => {
+    test('creates standard deck', () => {
+      expect(deck).toHaveLength(52);
+      expect(deck.filter(card => card[0] === 14)).toHaveLength(4); // 4 Aces
+    });
+
+    test('shuffles deck properly', () => {
+      const originalDeck = analyzer.createDeck();
+      const shuffled = analyzer.shuffleDeck(originalDeck);
+      expect(shuffled).toHaveLength(52);
+      expect(shuffled).not.toEqual(originalDeck); // Should be different order
+    });
+
+    test('identifies straights correctly', () => {
+      expect(analyzer.isStraight([14, 13, 12, 11, 10])).toBe(true);
+      expect(analyzer.isStraight([14, 5, 4, 3, 2])).toBe(true); // Ace-low
+      expect(analyzer.isStraight([14, 13, 11, 10, 9])).toBe(false);
+    });
+
+    test('parses card strings correctly', () => {
+      expect(analyzer.parseCard('AS')).toEqual([14, 'S']);
+      expect(analyzer.parseCard('KH')).toEqual([13, 'H']);
+      expect(analyzer.parseCard('10D')).toEqual([10, 'D']);
+      expect(analyzer.parseCard('2C')).toEqual([2, 'C']);
+    });
+  });
+});</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

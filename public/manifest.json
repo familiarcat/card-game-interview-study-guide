@@ -1,0 +1,21 @@
+{
+  "name": "Card Game Interview Study Guide",
+  "short_name": "Card Game Study",
+  "description": "Master card game algorithms for technical interviews",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e1e1e",
+  "theme_color": "#007acc",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
