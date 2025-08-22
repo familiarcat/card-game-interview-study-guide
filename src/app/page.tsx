@@ -954,21 +954,7 @@ compareHands(hand1Score, hand2Score) {
     setShuffledQuestions(shuffled)
   }, [])
 
-  // Prism.js syntax highlighting function
-  const highlightCode = (code: string) => {
-    if (!code) return ''
-    
-    try {
-      // Use Prism.js for professional syntax highlighting
-      if (typeof window !== 'undefined' && window.Prism) {
-        return window.Prism.highlight(code, window.Prism.languages.javascript, 'javascript')
-      }
-      return code // Fallback if Prism not loaded
-    } catch (error) {
-      console.error('Prism highlighting error:', error)
-      return code // Fallback to original code if highlighting fails
-    }
-  }
+
 
   const resetPracticeTest = () => {
     shuffleQuestions()
@@ -1184,7 +1170,7 @@ evaluateHand(hand) {
                 <h3>🔄 Combination Generation</h3>
                 <div className="code-block">
                   <div className="code-header">Finding Best Hand from Multiple Cards (From Source Code)</div>
-                  <pre><code className="javascript" dangerouslySetInnerHTML={{ __html: highlightCode(`// Find best possible hand from available cards
+                  <pre><code className="language-javascript">{`// Find best possible hand from available cards
 findBestHand(cards, handSize = 5) {
   if (cards.length < handSize) return null;
   
@@ -1214,7 +1200,7 @@ getCombinations(arr, r) {
     combos.forEach(combo => result.push([item, ...combo]));
   });
   return result;
-}`) }}></code></pre>
+}`}</code></pre>
                 </div>
               </div>
 
@@ -1222,7 +1208,7 @@ getCombinations(arr, r) {
                 <h3>⚖️ Hand Comparison</h3>
                 <div className="code-block">
                   <div className="code-header">Comparing Two Hand Scores (From Source Code)</div>
-                  <pre><code className="javascript" dangerouslySetInnerHTML={{ __html: highlightCode(`// Compare two hand scores
+                  <pre><code className="language-javascript">{`// Compare two hand scores
 compareHands(hand1Score, hand2Score) {
   const maxLength = Math.max(hand1Score.length, hand2Score.length);
   for (let i = 0; i < maxLength; i++) {
@@ -1232,7 +1218,7 @@ compareHands(hand1Score, hand2Score) {
     if (val1 < val2) return -1;
   }
   return 0;
-}`) }}></code></pre>
+}`}</code></pre>
                 </div>
               </div>
 
@@ -1240,7 +1226,7 @@ compareHands(hand1Score, hand2Score) {
                 <h3>🎲 Utility Functions</h3>
                 <div className="code-block">
                   <div className="code-header">Essential Helper Functions (From Source Code)</div>
-                  <pre><code className="javascript" dangerouslySetInnerHTML={{ __html: highlightCode(`// Create standard deck
+                  <pre><code className="language-javascript">{`// Create standard deck
 createDeck() {
   const suits = ['S', 'H', 'D', 'C'];
   const values = [2,3,4,5,6,7,8,9,10,11,12,13,14];
@@ -1269,7 +1255,7 @@ isStraight(values) {
     }
   }
   return true;
-}`) }}></code></pre>
+}`}</code></pre>
                 </div>
               </div>
             </div>
@@ -1345,7 +1331,7 @@ isStraight(values) {
                             <h5>📋 Complete Function Context:</h5>
                             <div className="code-block">
                               <div className="code-header">Where this code snippet fits:</div>
-                              <pre><code className="javascript" dangerouslySetInnerHTML={{ __html: highlightCode(shuffledQuestions[currentQuestion].fullFunction) }}></code></pre>
+                              <pre><code className="language-javascript">{shuffledQuestions[currentQuestion].fullFunction}</code></pre>
                             </div>
                           </div>
                         )}
@@ -1459,7 +1445,7 @@ isStraight(values) {
                 <details>
                   <summary>🔍 View Solution</summary>
                   <div className="solution-code">
-                    <pre><code className="javascript" dangerouslySetInnerHTML={{ __html: highlightCode(liveCodingChallenges[currentLiveChallenge].solution) }}></code></pre>
+                    <pre><code className="language-javascript">{liveCodingChallenges[currentLiveChallenge].solution}</code></pre>
                   </div>
                 </details>
               </div>
@@ -1549,7 +1535,7 @@ isStraight(values) {
                   
                   <div className="code-block">
                     <div className="code-header">Code to Review</div>
-                    <pre><code className="javascript" dangerouslySetInnerHTML={{ __html: highlightCode(example.code) }}></code></pre>
+                    <pre><code className="language-javascript">{example.code}</code></pre>
                   </div>
 
                   <div className="issues-section">
