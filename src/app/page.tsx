@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import Script from 'next/script'
+import { PrismLoader } from './components/PrismLoader'
 
 // Type definitions for Prism.js
 declare global {
@@ -42,21 +42,6 @@ export default function Home() {
   // Initialize shuffled questions on component mount
   useEffect(() => {
     shuffleQuestions()
-  }, [])
-
-  // Initialize Prism.js syntax highlighting
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Wait for Prism to load
-      const initPrism = () => {
-        if (window.Prism) {
-          window.Prism.highlightAll()
-        } else {
-          setTimeout(initPrism, 100)
-        }
-      }
-      initPrism()
-    }
   }, [])
 
   // Re-highlight code when active section changes
@@ -1059,13 +1044,7 @@ compareHands(hand1Score, hand2Score) {
   }
 
   return (
-    <>
-      {/* Load Prism.js for syntax highlighting */}
-      <Script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js" strategy="beforeInteractive" />
-      <Script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-clike.min.js" strategy="beforeInteractive" />
-      <Script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" strategy="beforeInteractive" />
-      <Script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js" strategy="beforeInteractive" />
-      
+    <PrismLoader>
       <div className="app-container">
         <header className="app-header">
           <h1>🎯 Card Game Interview Study Guide</h1>
@@ -2011,6 +1990,6 @@ describe('CardGameAnalyzer', () => {
         )}
       </main>
     </div>
-    </>
+    </PrismLoader>
   )
 }
