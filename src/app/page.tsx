@@ -1,6 +1,20 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import Script from 'next/script'
+
+// Type definitions for Prism.js
+declare global {
+  interface Window {
+    Prism: {
+      highlight: (code: string, grammar: unknown, language: string) => string;
+      highlightAll: () => void;
+      languages: {
+        javascript: unknown;
+      };
+    };
+  }
+}
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState('study')
@@ -29,6 +43,30 @@ export default function Home() {
   useEffect(() => {
     shuffleQuestions()
   }, [])
+
+  // Initialize Prism.js syntax highlighting
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Wait for Prism to load
+      const initPrism = () => {
+        if (window.Prism) {
+          window.Prism.highlightAll()
+        } else {
+          setTimeout(initPrism, 100)
+        }
+      }
+      initPrism()
+    }
+  }, [])
+
+  // Re-highlight code when active section changes
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.Prism) {
+      setTimeout(() => {
+        window.Prism.highlightAll()
+      }, 100)
+    }
+  }, [activeSection])
 
   const sections = [
     { id: 'study', label: '📚 Study Guide', icon: '📚' },
@@ -916,31 +954,18 @@ compareHands(hand1Score, hand2Score) {
     setShuffledQuestions(shuffled)
   }, [])
 
-  // Simple and safe syntax highlighting function
+  // Prism.js syntax highlighting function
   const highlightCode = (code: string) => {
     if (!code) return ''
     
     try {
-      let highlighted = code
-      
-      // Only highlight the most important elements to avoid conflicts
-      
-      // Keywords first
-      const keywords = ['function', 'const', 'let', 'var', 'return', 'if', 'else', 'for', 'while', 'map', 'filter', 'reduce']
-      keywords.forEach(keyword => {
-        const regex = new RegExp(`\\b${keyword}\\b`, 'g')
-        highlighted = highlighted.replace(regex, `<span class="keyword">${keyword}</span>`)
-      })
-      
-      // Numbers
-      highlighted = highlighted.replace(/\b(\d+)\b/g, '<span class="number">$1</span>')
-      
-      // Comments (simple approach)
-      highlighted = highlighted.replace(/(\/\/.*$)/gm, '<span class="comment">$1</span>')
-      
-      return highlighted
+      // Use Prism.js for professional syntax highlighting
+      if (typeof window !== 'undefined' && window.Prism) {
+        return window.Prism.highlight(code, window.Prism.languages.javascript, 'javascript')
+      }
+      return code // Fallback if Prism not loaded
     } catch (error) {
-      console.error('Syntax highlighting error:', error)
+      console.error('Prism highlighting error:', error)
       return code // Fallback to original code if highlighting fails
     }
   }
@@ -1048,11 +1073,18 @@ compareHands(hand1Score, hand2Score) {
   }
 
   return (
-    <div className="app-container">
-      <header className="app-header">
-        <h1>🎯 Card Game Interview Study Guide</h1>
-        <p>Master in 24 Hours, Execute in 10 Minutes</p>
-      </header>
+    <>
+      {/* Load Prism.js for syntax highlighting */}
+      <Script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js" strategy="beforeInteractive" />
+      <Script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-clike.min.js" strategy="beforeInteractive" />
+      <Script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" strategy="beforeInteractive" />
+      <Script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js" strategy="beforeInteractive" />
+      
+      <div className="app-container">
+        <header className="app-header">
+          <h1>🎯 Card Game Interview Study Guide</h1>
+          <p>Master in 24 Hours, Execute in 10 Minutes</p>
+        </header>
 
       <nav className="app-nav">
         {sections.map(section => (
@@ -1080,14 +1112,14 @@ compareHands(hand1Score, hand2Score) {
                 <h3>🎴 Card Representation Patterns</h3>
                 <div className="code-block">
                   <div className="code-header">Standard Card Representations</div>
-                  <pre><code className="javascript" dangerouslySetInnerHTML={{ __html: highlightCode(`// Standard representations you'll encounter:
+                  <pre><code className="language-javascript">{`// Standard representations you'll encounter:
  
 const card1 = [14, 'S']; // [value, suit] - Ace of Spades
 const card2 = {value: 14, suit: 'S'}; // Object notation
 const card3 = 'AS'; // String notation (convert to vector)
 
 // Hand as multidimensional array:
-const hand = [[14,'S'], [13,'H'], [12,'D'], [11,'C'], [10,'S']];`) }}></code></pre>
+const hand = [[14,'S'], [13,'H'], [12,'D'], [11,'C'], [10,'S']];`}</code></pre>
                 </div>
               </div>
 
@@ -1095,7 +1127,7 @@ const hand = [[14,'S'], [13,'H'], [12,'D'], [11,'C'], [10,'S']];`) }}></code></p
                 <h3>🔧 Key Vector Operations</h3>
                 <div className="code-block">
                   <div className="code-header">Essential Vector Manipulation</div>
-                  <pre><code className="javascript" dangerouslySetInnerHTML={{ __html: highlightCode(`// 1. Extract values only
+                  <pre><code className="language-javascript">{`// 1. Extract values only
 const values = hand.map(card => card[0]);
 // [14, 13, 12, 11, 10]
 
@@ -1109,7 +1141,7 @@ const suitGroups = hand.reduce((acc, card) => {
   if (!acc[suit]) acc[suit] = [];
   acc[suit].push(card[0]);
   return acc;
-}, {});`) }}></code></pre>
+}, {});`}</code></pre>
                 </div>
               </div>
 
@@ -1117,7 +1149,7 @@ const suitGroups = hand.reduce((acc, card) => {
                 <h3>🎯 Hand Evaluation Algorithm</h3>
                 <div className="code-block">
                   <div className="code-header">Core Hand Evaluation Logic (From Source Code)</div>
-                  <pre><code className="javascript" dangerouslySetInnerHTML={{ __html: highlightCode(`// Core function: Evaluate a 5-card hand
+                  <pre><code className="language-javascript">{`// Core function: Evaluate a 5-card hand
 evaluateHand(hand) {
   if (!hand || hand.length !== 5) return [this.HAND_RANKS.HIGH_CARD];
   
@@ -1144,7 +1176,7 @@ evaluateHand(hand) {
   }
   if (counts[0] === 2) return [this.HAND_RANKS.PAIR, this.getValueByCount(valueCounts, 2), ...values.filter(v => v !== this.getValueByCount(valueCounts, 2))];
   return [this.HAND_RANKS.HIGH_CARD, ...values];
-}`) }}></code></pre>
+}`}</code></pre>
                 </div>
               </div>
 
@@ -1993,5 +2025,6 @@ describe('CardGameAnalyzer', () => {
         )}
       </main>
     </div>
+    </>
   )
 }
