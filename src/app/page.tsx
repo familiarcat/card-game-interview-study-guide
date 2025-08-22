@@ -840,6 +840,35 @@ export default function Home() {
     setShuffledQuestions(shuffled)
   }, [])
 
+  // Simple and safe syntax highlighting function
+  const highlightCode = (code: string) => {
+    if (!code) return ''
+    
+    try {
+      let highlighted = code
+      
+      // Only highlight the most important elements to avoid conflicts
+      
+      // Keywords first
+      const keywords = ['function', 'const', 'let', 'var', 'return', 'if', 'else', 'for', 'while', 'map', 'filter', 'reduce']
+      keywords.forEach(keyword => {
+        const regex = new RegExp(`\\b${keyword}\\b`, 'g')
+        highlighted = highlighted.replace(regex, `<span class="keyword">${keyword}</span>`)
+      })
+      
+      // Numbers
+      highlighted = highlighted.replace(/\b(\d+)\b/g, '<span class="number">$1</span>')
+      
+      // Comments (simple approach)
+      highlighted = highlighted.replace(/(\/\/.*$)/gm, '<span class="comment">$1</span>')
+      
+      return highlighted
+    } catch (error) {
+      console.error('Syntax highlighting error:', error)
+      return code // Fallback to original code if highlighting fails
+    }
+  }
+
   const resetPracticeTest = () => {
     shuffleQuestions()
     setCurrentQuestion(0)
@@ -975,14 +1004,14 @@ export default function Home() {
                 <h3>🎴 Card Representation Patterns</h3>
                 <div className="code-block">
                   <div className="code-header">Standard Card Representations</div>
-                  <pre><code className="javascript">{`// Standard representations you'll encounter:
+                  <pre><code className="javascript" dangerouslySetInnerHTML={{ __html: highlightCode(`// Standard representations you'll encounter:
  
 const card1 = [14, 'S']; // [value, suit] - Ace of Spades
 const card2 = {value: 14, suit: 'S'}; // Object notation
 const card3 = 'AS'; // String notation (convert to vector)
 
 // Hand as multidimensional array:
-const hand = [[14,'S'], [13,'H'], [12,'D'], [11,'C'], [10,'S']];`}</code></pre>
+const hand = [[14,'S'], [13,'H'], [12,'D'], [11,'C'], [10,'S']];`) }}></code></pre>
                 </div>
               </div>
 
@@ -990,7 +1019,7 @@ const hand = [[14,'S'], [13,'H'], [12,'D'], [11,'C'], [10,'S']];`}</code></pre>
                 <h3>🔧 Key Vector Operations</h3>
                 <div className="code-block">
                   <div className="code-header">Essential Vector Manipulation</div>
-                  <pre><code className="javascript">{`// 1. Extract values only
+                  <pre><code className="javascript" dangerouslySetInnerHTML={{ __html: highlightCode(`// 1. Extract values only
 const values = hand.map(card => card[0]);
 // [14, 13, 12, 11, 10]
 
@@ -1004,7 +1033,7 @@ const suitGroups = hand.reduce((acc, card) => {
   if (!acc[suit]) acc[suit] = [];
   acc[suit].push(card[0]);
   return acc;
-}, {});`}</code></pre>
+}, {});`) }}></code></pre>
                 </div>
               </div>
 
@@ -1012,7 +1041,7 @@ const suitGroups = hand.reduce((acc, card) => {
                 <h3>🎯 Hand Evaluation Algorithm</h3>
                 <div className="code-block">
                   <div className="code-header">Core Hand Evaluation Logic</div>
-                  <pre><code className="javascript">{`function evaluateHand(hand) {
+                  <pre><code className="javascript" dangerouslySetInnerHTML={{ __html: highlightCode(`function evaluateHand(hand) {
   if (!hand || hand.length !== 5) return [0];
   
   const values = hand.map(card => card[0]).sort((a, b) => b - a);
@@ -1035,7 +1064,7 @@ const suitGroups = hand.reduce((acc, card) => {
   if (counts[0] === 2 && counts[1] === 2) return [2, ...getTwoPairValues(valueCounts)];
   if (counts[0] === 2) return [1, getValueByCount(valueCounts, 2)];
   return [0, ...values];
-}`}</code></pre>
+}`) }}></code></pre>
                 </div>
               </div>
 
@@ -1043,7 +1072,7 @@ const suitGroups = hand.reduce((acc, card) => {
                 <h3>🔄 Combination Generation</h3>
                 <div className="code-block">
                   <div className="code-header">Finding Best Hand from Multiple Cards</div>
-                  <pre><code className="javascript">{`function findBestHand(cards, handSize = 5) {
+                  <pre><code className="javascript" dangerouslySetInnerHTML={{ __html: highlightCode(`function findBestHand(cards, handSize = 5) {
   if (cards.length < handSize) return null;
   
   const combinations = getCombinations(cards, handSize);
@@ -1071,7 +1100,7 @@ function getCombinations(arr, r) {
     combos.forEach(combo => result.push([item, ...combo]));
   });
   return result;
-}`}</code></pre>
+}`) }}></code></pre>
                 </div>
               </div>
 
@@ -1079,7 +1108,7 @@ function getCombinations(arr, r) {
                 <h3>⚖️ Hand Comparison</h3>
                 <div className="code-block">
                   <div className="code-header">Comparing Two Hand Scores</div>
-                  <pre><code className="javascript">{`function compareHands(hand1Score, hand2Score) {
+                  <pre><code className="javascript" dangerouslySetInnerHTML={{ __html: highlightCode(`function compareHands(hand1Score, hand2Score) {
   const maxLength = Math.max(hand1Score.length, hand2Score.length);
   
   for (let i = 0; i < maxLength; i++) {
@@ -1091,7 +1120,7 @@ function getCombinations(arr, r) {
   }
   
   return 0; // Tie
-}`}</code></pre>
+}`) }}></code></pre>
                 </div>
               </div>
 
@@ -1099,7 +1128,7 @@ function getCombinations(arr, r) {
                 <h3>🎲 Utility Functions</h3>
                 <div className="code-block">
                   <div className="code-header">Essential Helper Functions</div>
-                  <pre><code className="javascript">{`// Create standard deck
+                  <pre><code className="javascript" dangerouslySetInnerHTML={{ __html: highlightCode(`// Create standard deck
 function createDeck() {
   const suits = ['S', 'H', 'D', 'C'];
   const values = [2,3,4,5,6,7,8,9,10,11,12,13,14];
@@ -1130,7 +1159,7 @@ function isStraight(values) {
     }
   }
   return true;
-}`}</code></pre>
+}`) }}></code></pre>
                 </div>
               </div>
             </div>
@@ -1206,7 +1235,7 @@ function isStraight(values) {
                             <h5>📋 Complete Function Context:</h5>
                             <div className="code-block">
                               <div className="code-header">Where this code snippet fits:</div>
-                              <pre><code className="javascript">{shuffledQuestions[currentQuestion].fullFunction}</code></pre>
+                              <pre><code className="javascript" dangerouslySetInnerHTML={{ __html: highlightCode(shuffledQuestions[currentQuestion].fullFunction) }}></code></pre>
                             </div>
                           </div>
                         )}
@@ -1320,7 +1349,7 @@ function isStraight(values) {
                 <details>
                   <summary>🔍 View Solution</summary>
                   <div className="solution-code">
-                    <pre><code className="javascript">{liveCodingChallenges[currentLiveChallenge].solution}</code></pre>
+                    <pre><code className="javascript" dangerouslySetInnerHTML={{ __html: highlightCode(liveCodingChallenges[currentLiveChallenge].solution) }}></code></pre>
                   </div>
                 </details>
               </div>
@@ -1410,7 +1439,7 @@ function isStraight(values) {
                   
                   <div className="code-block">
                     <div className="code-header">Code to Review</div>
-                    <pre><code className="javascript">{example.code}</code></pre>
+                    <pre><code className="javascript" dangerouslySetInnerHTML={{ __html: highlightCode(example.code) }}></code></pre>
                   </div>
 
                   <div className="issues-section">
