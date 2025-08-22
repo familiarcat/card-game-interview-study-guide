@@ -878,44 +878,36 @@ body {
 }
 
 .code-editor .code-input {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: transparent;
+  background-color: var(--bg-primary);
   border: none;
   outline: none;
-  color: transparent;
-  caret-color: var(--text-primary);
+  color: #9cdcfe; /* VSCode light blue for better readability */
   font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
   font-size: 14px;
   line-height: 1.5;
-  padding: 1rem;
-  resize: vertical;
-  z-index: 2;
-}
-
-.code-editor .code-display {
-  background-color: var(--bg-primary);
   padding: 1rem;
   min-height: 200px;
-  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
-  font-size: 14px;
-  line-height: 1.5;
   white-space: pre-wrap;
   word-wrap: break-word;
-  color: var(--text-primary);
-  z-index: 1;
+  overflow-wrap: break-word;
+  resize: vertical;
+  caret-color: #9cdcfe; /* Match text color */
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.code-editor .code-display code {
-  background: none !important;
-  padding: 0 !important;
-  border-radius: 0 !important;
-  font-size: inherit !important;
-  font-family: inherit !important;
+.code-editor .code-input:focus {
+  outline: none;
+  border: none;
+  box-shadow: 0 0 0 2px var(--accent-primary);
 }
+
+.code-editor .code-input::placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+
 
 /* Timed Challenge Styles */
 .timed-setup {

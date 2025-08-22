@@ -40,10 +40,19 @@ export default function Home() {
   const [currentLiveChallenge, setCurrentLiveChallenge] = useState(0)
   const [shuffledQuestions, setShuffledQuestions] = useState<Array<typeof practiceQuestions[0]>>([])
 
+  const shuffleQuestions = useCallback(() => {
+    const shuffled = [...practiceQuestions]
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+    setShuffledQuestions(shuffled)
+  }, [])
+
   // Initialize shuffled questions on component mount
   useEffect(() => {
     shuffleQuestions()
-  }, [])
+  }, [shuffleQuestions])
 
   // Re-highlight code when active section changes
   useEffect(() => {
@@ -102,13 +111,8 @@ export default function Home() {
   useEffect(() => {
     if (typeof window !== 'undefined' && window.Prism) {
       setTimeout(() => {
-        // Specifically target the code display elements in the editors
-        const codeDisplays = document.querySelectorAll('.code-display code')
-        codeDisplays.forEach((codeElement) => {
-          if (window.Prism && window.Prism.highlightElement) {
-            window.Prism.highlightElement(codeElement)
-          }
-        })
+        // Apply highlighting to all code elements (for solution sections)
+        window.Prism.highlightAll()
       }, 100)
     }
   }, [liveCodeInput, timedCodeInput])
@@ -1233,6 +1237,8 @@ compareHands(hand1Score, hand2Score) {
     }
   ]
 
+
+
   // Functions
   const handleAnswer = (selectedOption: number) => {
     setSelectedAnswer(selectedOption)
@@ -1254,17 +1260,6 @@ compareHands(hand1Score, hand2Score) {
       setShowResults(true)
     }
   }
-
-  const shuffleQuestions = useCallback(() => {
-    const shuffled = [...practiceQuestions]
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-    }
-    setShuffledQuestions(shuffled)
-  }, [])
-
-
 
   const resetPracticeTest = () => {
     shuffleQuestions()
@@ -1706,11 +1701,24 @@ isStraight(values) {
                     className="code-input"
                     value={liveCodeInput}
                     onChange={(e) => setLiveCodeInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      // Handle tab key
+                      if (e.key === 'Tab') {
+                        e.preventDefault()
+                        const start = e.currentTarget.selectionStart
+                        const end = e.currentTarget.selectionEnd
+                        const value = e.currentTarget.value
+                        const newValue = value.substring(0, start) + '  ' + value.substring(end)
+                        setLiveCodeInput(newValue)
+                        // Set cursor position after tab
+                        setTimeout(() => {
+                          e.currentTarget.selectionStart = e.currentTarget.selectionEnd = start + 2
+                        }, 0)
+                      }
+                    }}
                     rows={10}
+                    placeholder="Enter your JavaScript code here..."
                   />
-                  <div className="code-display">
-                    <pre><code className="language-javascript">{liveCodeInput}</code></pre>
-                  </div>
                 </div>
               </div>
 
@@ -1809,11 +1817,24 @@ isStraight(values) {
                         className="code-input"
                         value={timedCodeInput}
                         onChange={(e) => setTimedCodeInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          // Handle tab key
+                          if (e.key === 'Tab') {
+                            e.preventDefault()
+                            const start = e.currentTarget.selectionStart
+                            const end = e.currentTarget.selectionEnd
+                            const value = e.currentTarget.value
+                            const newValue = value.substring(0, start) + '  ' + value.substring(end)
+                            setTimedCodeInput(newValue)
+                            // Set cursor position after tab
+                            setTimeout(() => {
+                              e.currentTarget.selectionStart = e.currentTarget.selectionEnd = start + 2
+                            }, 0)
+                          }
+                        }}
                         rows={8}
+                        placeholder="Enter your JavaScript code here..."
                       />
-                      <div className="code-display">
-                        <pre><code className="language-javascript">{timedCodeInput}</code></pre>
-                      </div>
                     </div>
                   </div>
                   
