@@ -27,6 +27,7 @@ export default function Home() {
   const [showAnswer, setShowAnswer] = useState(false)
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [liveCodeInput, setLiveCodeInput] = useState('')
+  const [timedCodeInput, setTimedCodeInput] = useState('')
   const [liveCodeResult, setLiveCodeResult] = useState<Array<{
     testCase: string;
     input: string;
@@ -84,6 +85,33 @@ export default function Home() {
       }, 200) // Slightly longer delay to ensure content is rendered
     }
   }, [showAnswer])
+
+  // Initialize live code input with starter code when challenge changes
+  useEffect(() => {
+    setLiveCodeInput(liveCodingChallenges[currentLiveChallenge].starterCode)
+  }, [currentLiveChallenge])
+
+  // Initialize timed code input with starter code when timed challenge starts
+  useEffect(() => {
+    if (isTimedChallengeActive && timedQuestions[currentQuestion]) {
+      setTimedCodeInput(timedQuestions[currentQuestion].code)
+    }
+  }, [isTimedChallengeActive, currentQuestion])
+
+  // Apply syntax highlighting to code inputs when they change
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.Prism) {
+      setTimeout(() => {
+        // Specifically target the code display elements in the editors
+        const codeDisplays = document.querySelectorAll('.code-display code')
+        codeDisplays.forEach((codeElement) => {
+          if (window.Prism && window.Prism.highlightElement) {
+            window.Prism.highlightElement(codeElement)
+          }
+        })
+      }, 100)
+    }
+  }, [liveCodeInput, timedCodeInput])
 
   const sections = [
     { id: 'study', label: '📚 Study Guide', icon: '📚' },
@@ -1300,7 +1328,6 @@ compareHands(hand1Score, hand2Score) {
   const nextLiveChallenge = () => {
     if (currentLiveChallenge < liveCodingChallenges.length - 1) {
       setCurrentLiveChallenge(currentLiveChallenge + 1)
-      setLiveCodeInput('')
       setLiveCodeResult(null)
       setShowHint(false)
     }
@@ -1309,7 +1336,6 @@ compareHands(hand1Score, hand2Score) {
   const prevLiveChallenge = () => {
     if (currentLiveChallenge > 0) {
       setCurrentLiveChallenge(currentLiveChallenge - 1)
-      setLiveCodeInput('')
       setLiveCodeResult(null)
       setShowHint(false)
     }
@@ -1650,13 +1676,17 @@ isStraight(values) {
                     ▶️ Run Tests
                   </button>
                 </div>
-                <textarea
-                  className="code-input"
-                  value={liveCodeInput}
-                  onChange={(e) => setLiveCodeInput(e.target.value)}
-                  placeholder={liveCodingChallenges[currentLiveChallenge].starterCode}
-                  rows={10}
-                />
+                <div className="code-input-container">
+                  <textarea
+                    className="code-input"
+                    value={liveCodeInput}
+                    onChange={(e) => setLiveCodeInput(e.target.value)}
+                    rows={10}
+                  />
+                  <div className="code-display">
+                    <pre><code className="language-javascript">{liveCodeInput}</code></pre>
+                  </div>
+                </div>
               </div>
 
               <div className="hint-section">
@@ -1749,11 +1779,17 @@ isStraight(values) {
                 <div className="challenge-content">
                   <h3>{timedQuestions[currentQuestion].question}</h3>
                   <div className="code-editor">
-                    <textarea
-                      className="code-input"
-                      placeholder={timedQuestions[currentQuestion].code}
-                      rows={8}
-                    />
+                    <div className="code-input-container">
+                      <textarea
+                        className="code-input"
+                        value={timedCodeInput}
+                        onChange={(e) => setTimedCodeInput(e.target.value)}
+                        rows={8}
+                      />
+                      <div className="code-display">
+                        <pre><code className="language-javascript">{timedCodeInput}</code></pre>
+                      </div>
+                    </div>
                   </div>
                   
                   <div className="test-cases">
