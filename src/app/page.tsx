@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState('study')
@@ -10,6 +10,8 @@ export default function Home() {
   const [timer, setTimer] = useState(300) // 5 minutes for timed challenge
   const [isTimedChallengeActive, setIsTimedChallengeActive] = useState(false)
   const [showHint, setShowHint] = useState(false)
+  const [showAnswer, setShowAnswer] = useState(false)
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [liveCodeInput, setLiveCodeInput] = useState('')
   const [liveCodeResult, setLiveCodeResult] = useState<Array<{
     testCase: string;
@@ -21,6 +23,12 @@ export default function Home() {
     error?: string;
   }> | null>(null)
   const [currentLiveChallenge, setCurrentLiveChallenge] = useState(0)
+  const [shuffledQuestions, setShuffledQuestions] = useState<Array<typeof practiceQuestions[0]>>([])
+
+  // Initialize shuffled questions on component mount
+  useEffect(() => {
+    shuffleQuestions()
+  }, [])
 
   const sections = [
     { id: 'study', label: '📚 Study Guide', icon: '📚' },
@@ -211,6 +219,212 @@ export default function Home() {
       correct: 1,
       explanation: "Always validate input first: check hand length is 5, each card has [value, suit] format.",
       hint: "Defensive programming - what should you check before processing any data? Think about the basic requirements for a poker hand."
+    },
+    
+    // NEW: Advanced Array Manipulation Questions
+    {
+      question: "Complete this code to find the second highest value: const values = [14, 13, 12, 11, 10]; const secondHighest = ___;",
+      options: [
+        "values.sort((a,b) => b-a)[1]",
+        "values.sort((a,b) => a-b)[values.length-2]",
+        "Math.max(...values.filter(v => v !== Math.max(...values)))",
+        "values.reduce((max, val) => val > max ? val : max, 0)"
+      ],
+      correct: 0,
+      explanation: "Sort in descending order (b-a) and take the second element [1]. This is the most readable and efficient approach.",
+      hint: "Sort the array in descending order and pick the second element."
+    },
+    {
+      question: "Fill in the blank to check if all values are even: const values = [2, 4, 6, 8, 10]; const allEven = values.___(val => val % 2 === 0);",
+      options: [
+        "every",
+        "some",
+        "filter",
+        "reduce"
+      ],
+      correct: 0,
+      explanation: "every() returns true only if ALL elements pass the test. some() would return true if ANY element passes.",
+      hint: "You want to check if ALL elements meet a condition, not just some."
+    },
+    {
+      question: "Complete this code to find the most frequent value: const values = [14, 14, 13, 13, 13]; const mostFrequent = ___;",
+      options: [
+        "values.sort((a,b) => values.filter(v => v === a).length - values.filter(v => v === b).length)[0]",
+        "Object.entries(values.reduce((acc, val) => { acc[val] = (acc[val] || 0) + 1; return acc; }, {})).sort((a,b) => b[1] - a[1])[0][0]",
+        "values.find(val => values.filter(v => v === val).length === Math.max(...values.map(v => values.filter(x => x === v).length)))",
+        "values.reduce((max, val) => values.filter(v => v === val).length > values.filter(v => v === max).length ? val : max)"
+      ],
+      correct: 1,
+      explanation: "Use reduce to count occurrences, then Object.entries to convert to array, sort by count, and take the first value. This is the most efficient approach.",
+      hint: "Count occurrences first, then find the one with the highest count."
+    },
+    {
+      question: "What's the missing code to check for consecutive values? const values = [10, 11, 12, 13, 14]; const isConsecutive = values.sort((a,b) => a-b).___((val, i) => i === 0 || val === values[i-1] + 1);",
+      options: [
+        "every",
+        "some",
+        "filter",
+        "map"
+      ],
+      correct: 0,
+      explanation: "every() checks if ALL elements pass the test. For consecutive values, each element (except first) should equal the previous + 1.",
+      hint: "You need to verify that EVERY element meets the consecutive condition."
+    },
+    {
+      question: "Complete this code to find pairs: const values = [14, 14, 13, 13, 12]; const pairs = values.reduce((acc, val) => { if (values.filter(v => v === val).length === 2) acc.push(val); return acc; }, []); const uniquePairs = ___;",
+      options: [
+        "pairs",
+        "pairs.filter((val, i) => pairs.indexOf(val) === i)",
+        "new Set(pairs)",
+        "[...new Set(pairs)]"
+      ],
+      correct: 3,
+      explanation: "new Set(pairs) creates a Set of unique values, then spread it back to an array. This removes duplicates efficiently.",
+      hint: "You need to remove duplicates from the pairs array."
+    },
+    {
+      question: "Fill in the blank to rotate array left by 1: const values = [14, 13, 12, 11, 10]; const rotated = [values[1], values[2], values[3], values[4], ___];",
+      options: [
+        "values[0]",
+        "values[5]",
+        "values[values.length-1]",
+        "values[values.length]"
+      ],
+      correct: 0,
+      explanation: "Rotating left by 1 means the first element becomes the last. So values[0] goes at the end.",
+      hint: "In a left rotation, where does the first element end up?"
+    },
+    {
+      question: "Complete this code to find the median value: const values = [10, 11, 12, 13, 14]; const median = values.length % 2 === 0 ? ___ : values[Math.floor(values.length/2)];",
+      options: [
+        "(values[values.length/2] + values[values.length/2 - 1]) / 2",
+        "values[values.length/2]",
+        "values[Math.floor(values.length/2)]",
+        "values[values.length/2 - 1]"
+      ],
+      correct: 0,
+      explanation: "For even-length arrays, median is the average of the two middle values. For odd-length, it's the middle value.",
+      hint: "When the array length is even, you need the average of two middle values."
+    },
+    {
+      question: "What's the missing code to check for three of a kind? const values = [14, 14, 14, 13, 12]; const hasThreeOfAKind = values.___(val => values.filter(v => v === val).length === 3);",
+      options: [
+        "every",
+        "some",
+        "filter",
+        "find"
+      ],
+      correct: 1,
+      explanation: "some() returns true if ANY element passes the test. We only need one value to appear three times.",
+      hint: "You only need to find ONE value that appears three times, not check all values."
+    },
+    {
+      question: "Complete this code to reverse the array: const values = [14, 13, 12, 11, 10]; const reversed = values.___;",
+      options: [
+        "reverse()",
+        "slice().reverse()",
+        "map((val, i) => values[values.length - 1 - i])",
+        "reduce((acc, val) => [val, ...acc], [])"
+      ],
+      correct: 1,
+      explanation: "slice().reverse() creates a copy first, then reverses it. reverse() mutates the original array, which is usually not desired.",
+      hint: "reverse() mutates the original array. How can you avoid that?"
+    },
+    {
+      question: "Fill in the blank to find the longest sequence of consecutive values: const values = [10, 11, 12, 15, 16, 17]; let maxLength = 1, currentLength = 1; for (let i = 1; i < values.length; i++) { if (values[i] === values[i-1] + 1) { currentLength++; maxLength = Math.max(maxLength, currentLength); } else { ___; } }",
+      options: [
+        "currentLength = 1",
+        "currentLength = 0",
+        "currentLength++",
+        "maxLength = currentLength"
+      ],
+      correct: 0,
+      explanation: "When we break the consecutive sequence, we reset currentLength to 1 (the current element starts a new sequence).",
+      hint: "When the sequence breaks, you need to start counting a new sequence from 1."
+    },
+    {
+      question: "Complete this code to check for a full house: const values = [14, 14, 13, 13, 13]; const counts = values.reduce((acc, val) => { acc[val] = (acc[val] || 0) + 1; return acc; }, {}); const hasFullHouse = ___;",
+      options: [
+        "Object.values(counts).includes(2) && Object.values(counts).includes(3)",
+        "Object.values(counts).filter(count => count === 2 || count === 3).length === 2",
+        "Object.values(counts).some(count => count === 2) && Object.values(counts).some(count => count === 3)",
+        "Object.values(counts).every(count => count === 2 || count === 3)"
+      ],
+      correct: 0,
+      explanation: "A full house has exactly one value appearing twice and one value appearing three times. This checks for both conditions.",
+      hint: "A full house needs exactly one pair (2) and one three of a kind (3)."
+    },
+    {
+      question: "What's the missing code to find the highest card not in a pair? const values = [14, 14, 13, 12, 11]; const pairValue = values.find(val => values.filter(v => v === val).length === 2); const kicker = Math.max(...values.filter(val => ___));",
+      options: [
+        "val !== pairValue",
+        "val === pairValue",
+        "val > pairValue",
+        "val < pairValue"
+      ],
+      correct: 0,
+      explanation: "The kicker is the highest card NOT in the pair. So we filter out the pair value and find the max of the remaining cards.",
+      hint: "The kicker should exclude the pair value, not include it."
+    },
+    {
+      question: "Complete this code to check for a straight flush: const suits = ['S', 'S', 'S', 'S', 'S']; const values = [10, 11, 12, 13, 14]; const isStraightFlush = ___;",
+      options: [
+        "new Set(suits).size === 1 && values.sort((a,b) => a-b).every((val, i) => i === 0 || val === values[i-1] + 1)",
+        "suits.every(suit => suit === suits[0]) && values.every((val, i) => val === values[0] + i)",
+        "suits.filter(suit => suit === suits[0]).length === 5 && values.reduce((acc, val, i) => acc && (i === 0 || val === values[i-1] + 1), true)",
+        "suits[0] === suits[1] === suits[2] === suits[3] === suits[4] && values.sort((a,b) => a-b).reduce((acc, val, i) => acc && (i === 0 || val === values[i-1] + 1), true)"
+      ],
+      correct: 0,
+      explanation: "Check if all suits are the same (Set size === 1) AND if values are consecutive (sorted and each equals previous + 1).",
+      hint: "A straight flush needs both: all same suit AND consecutive values."
+    },
+    {
+      question: "Fill in the blank to find the highest value that appears exactly once: const values = [14, 14, 13, 12, 11]; const uniqueValues = values.filter(val => values.filter(v => v === val).length === 1); const highestUnique = ___;",
+      options: [
+        "Math.max(...uniqueValues)",
+        "uniqueValues[0]",
+        "uniqueValues.sort((a,b) => b-a)[0]",
+        "uniqueValues.reduce((max, val) => val > max ? val : max, 0)"
+      ],
+      correct: 0,
+      explanation: "Math.max() with spread operator is the most efficient way to find the maximum value in an array.",
+      hint: "You have an array of unique values. How do you find the maximum?"
+    },
+    {
+      question: "Complete this code to check for four of a kind: const values = [14, 14, 14, 14, 13]; const hasFourOfAKind = values.___(val => values.filter(v => v === val).length === 4);",
+      options: [
+        "every",
+        "some",
+        "filter",
+        "find"
+      ],
+      correct: 1,
+      explanation: "some() returns true if ANY element passes the test. We only need one value to appear four times.",
+      hint: "You only need to find ONE value that appears four times, not check all values."
+    },
+    {
+      question: "What's the missing code to find the second highest value in a sorted array? const values = [14, 13, 12, 11, 10]; const secondHighest = values[___];",
+      options: [
+        "1",
+        "values.length - 2",
+        "Math.floor(values.length / 2)",
+        "0"
+      ],
+      correct: 0,
+      explanation: "In a descending sorted array, the second highest value is at index 1 (second element).",
+      hint: "If the array is sorted from highest to lowest, where is the second highest element?"
+    },
+    {
+      question: "Complete this code to check for a royal flush: const suits = ['S', 'S', 'S', 'S', 'S']; const values = [10, 11, 12, 13, 14]; const isRoyalFlush = ___;",
+      options: [
+        "new Set(suits).size === 1 && values.sort((a,b) => a-b).join('') === '1011121314'",
+        "suits.every(suit => suit === 'S') && values.every((val, i) => val === 10 + i)",
+        "new Set(suits).size === 1 && values.sort((a,b) => a-b)[0] === 10 && values.sort((a,b) => a-b)[4] === 14",
+        "suits[0] === suits[1] === suits[2] === suits[3] === suits[4] && values.sort((a,b) => a-b).reduce((acc, val, i) => acc && val === 10 + i, true)"
+      ],
+      correct: 2,
+      explanation: "Check if all suits are the same AND if the lowest value is 10 and highest is 14 (after sorting).",
+      hint: "A royal flush is a straight flush that starts at 10 and ends at 14 (Ace)."
     }
   ]
 
@@ -512,23 +726,43 @@ export default function Home() {
 
   // Functions
   const handleAnswer = (selectedOption: number) => {
-    const question = practiceQuestions[currentQuestion]
+    setSelectedAnswer(selectedOption)
+    setShowAnswer(true)
+    
+    const question = shuffledQuestions[currentQuestion]
     if (selectedOption === question.correct) {
       setScore(score + 1)
     }
-    
-    if (currentQuestion < practiceQuestions.length - 1) {
+  }
+
+  const nextQuestion = () => {
+    if (currentQuestion < shuffledQuestions.length - 1) {
       setCurrentQuestion(currentQuestion + 1)
+      setShowAnswer(false)
+      setSelectedAnswer(null)
+      setShowHint(false)
     } else {
       setShowResults(true)
     }
   }
 
+  const shuffleQuestions = useCallback(() => {
+    const shuffled = [...practiceQuestions]
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+    setShuffledQuestions(shuffled)
+  }, [])
+
   const resetPracticeTest = () => {
+    shuffleQuestions()
     setCurrentQuestion(0)
     setScore(0)
     setShowResults(false)
     setShowHint(false)
+    setShowAnswer(false)
+    setSelectedAnswer(null)
   }
 
   const startTimedChallenge = () => {
@@ -829,53 +1063,91 @@ function isStraight(values) {
             {!showResults ? (
               <div className="practice-test">
                 <div className="question-header">
-                  <h3>Question {currentQuestion + 1} of {practiceQuestions.length}</h3>
+                                      <h3>Question {currentQuestion + 1} of {shuffledQuestions.length}</h3>
                   <div className="progress-bar">
                     <div 
                       className="progress-fill" 
-                      style={{width: `${((currentQuestion + 1) / practiceQuestions.length) * 100}%`}}
+                      style={{width: `${((currentQuestion + 1) / shuffledQuestions.length) * 100}%`}}
                     ></div>
                   </div>
                 </div>
 
                 <div className="question-content">
-                  <p className="question-text">{practiceQuestions[currentQuestion].question}</p>
+                  <p className="question-text">{shuffledQuestions[currentQuestion].question}</p>
                   
                   <div className="options">
-                    {practiceQuestions[currentQuestion].options.map((option, index) => (
+                    {shuffledQuestions[currentQuestion].options.map((option, index) => (
                       <button
                         key={index}
-                        className="option-btn"
+                        className={`option-btn ${
+                          showAnswer && index === shuffledQuestions[currentQuestion].correct
+                            ? 'correct'
+                            : showAnswer && index === selectedAnswer && index !== shuffledQuestions[currentQuestion].correct
+                            ? 'incorrect'
+                            : ''
+                        }`}
                         onClick={() => handleAnswer(index)}
+                        disabled={showAnswer}
                       >
                         {String.fromCharCode(65 + index)}. {option}
+                        {showAnswer && index === shuffledQuestions[currentQuestion].correct && (
+                          <span className="answer-indicator">✅ Correct!</span>
+                        )}
+                        {showAnswer && index === selectedAnswer && index !== shuffledQuestions[currentQuestion].correct && (
+                          <span className="answer-indicator">❌ Your Answer</span>
+                        )}
                       </button>
                     ))}
                   </div>
 
-                  <div className="hint-section">
-                    <button className="hint-btn" onClick={getHint}>
-                      💡 Need a hint?
-                    </button>
-                    {showHint && (
-                      <div className="hint-content">
-                        <strong>Hint:</strong> {practiceQuestions[currentQuestion].hint}
+                  {showAnswer && (
+                    <div className="answer-feedback">
+                      <div className={`feedback-header ${selectedAnswer === shuffledQuestions[currentQuestion].correct ? 'correct' : 'incorrect'}`}>
+                        {selectedAnswer === shuffledQuestions[currentQuestion].correct ? (
+                          <h4>🎉 Correct!</h4>
+                        ) : (
+                          <h4>❌ Incorrect</h4>
+                        )}
                       </div>
-                    )}
-                  </div>
+                      
+                      <div className="feedback-content">
+                        <p><strong>Explanation:</strong> {shuffledQuestions[currentQuestion].explanation}</p>
+                        {selectedAnswer !== shuffledQuestions[currentQuestion].correct && (
+                          <p><strong>Correct Answer:</strong> {String.fromCharCode(65 + shuffledQuestions[currentQuestion].correct)}. {shuffledQuestions[currentQuestion].options[shuffledQuestions[currentQuestion].correct]}</p>
+                        )}
+                      </div>
+
+                      <button className="next-btn" onClick={nextQuestion}>
+                        {currentQuestion < shuffledQuestions.length - 1 ? 'Next Question →' : 'See Results →'}
+                      </button>
+                    </div>
+                  )}
+
+                  {!showAnswer && (
+                    <div className="hint-section">
+                      <button className="hint-btn" onClick={getHint}>
+                        💡 Need a hint?
+                      </button>
+                      {showHint && (
+                        <div className="hint-content">
+                          <strong>Hint:</strong> {shuffledQuestions[currentQuestion].hint}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
               <div className="results">
                 <h3>🎉 Practice Test Complete!</h3>
-                <p>Your Score: <strong>{score}</strong> out of <strong>{practiceQuestions.length}</strong></p>
-                <p>Percentage: <strong>{Math.round((score / practiceQuestions.length) * 100)}%</strong></p>
+                <p>Your Score: <strong>{score}</strong> out of <strong>{shuffledQuestions.length}</strong></p>
+                <p>Percentage: <strong>{Math.round((score / shuffledQuestions.length) * 100)}%</strong></p>
                 
                 <div className="score-feedback">
-                  {score === practiceQuestions.length && <p>🏆 Perfect! You&apos;re ready for any interview!</p>}
-                  {score >= practiceQuestions.length * 0.8 && <p>🎯 Excellent! You have a strong foundation.</p>}
-                  {score >= practiceQuestions.length * 0.6 && <p>👍 Good work! Review the concepts you missed.</p>}
-                  {score < practiceQuestions.length * 0.6 && <p>📚 Keep studying! Focus on the fundamentals.</p>}
+                  {score === shuffledQuestions.length && <p>🏆 Perfect! You&apos;re ready for any interview!</p>}
+                  {score >= shuffledQuestions.length * 0.8 && <p>🎯 Excellent! You have a strong foundation.</p>}
+                  {score >= shuffledQuestions.length * 0.6 && <p>👍 Good work! Review the concepts you missed.</p>}
+                  {score < shuffledQuestions.length * 0.6 && <p>📚 Keep studying! Focus on the fundamentals.</p>}
                 </div>
 
                 <button className="reset-btn" onClick={resetPracticeTest}>
