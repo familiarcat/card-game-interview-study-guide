@@ -16,6 +16,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="stylesheet" href="/vsc-dark-plus.css" />
+      </head>
       <body className={inter.className}>
         <div className="app-container">
           {children}

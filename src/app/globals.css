@@ -1,6 +1,5 @@
 /* VSCode Dark Theme - Card Game Study Guide */
 @import "tailwindcss";
-@import "prismjs/themes/prism-tomorrow.css";
 @import "prismjs/plugins/line-numbers/prism-line-numbers.css";
 
 :root {
