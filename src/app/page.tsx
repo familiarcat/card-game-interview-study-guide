@@ -113,6 +113,31 @@ export default function Home() {
     }
   }, [liveCodeInput, timedCodeInput])
 
+  // Timer countdown for timed challenge
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null
+    
+    if (isTimedChallengeActive && timer > 0) {
+      interval = setInterval(() => {
+        setTimer(prevTimer => {
+          if (prevTimer <= 1) {
+            // Time's up! End the challenge
+            setIsTimedChallengeActive(false)
+            setTimer(300) // Reset timer for next challenge
+            return 0
+          }
+          return prevTimer - 1
+        })
+      }, 1000)
+    }
+    
+    return () => {
+      if (interval) {
+        clearInterval(interval)
+      }
+    }
+  }, [isTimedChallengeActive, timer])
+
   const sections = [
     { id: 'study', label: '📚 Study Guide', icon: '📚' },
     { id: 'practice', label: '🧪 Practice Tests', icon: '🧪' },
