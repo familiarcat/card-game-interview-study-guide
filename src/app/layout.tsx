@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import './globals.css'
+import './styles.css'
+import './prism-vsc-dark-plus.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -16,9 +17,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head>
-        <link rel="stylesheet" href="/vsc-dark-plus.css" />
-      </head>
       <body className={inter.className}>
         <div className="app-container">
           {children}
