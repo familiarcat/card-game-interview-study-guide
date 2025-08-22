@@ -53,6 +53,15 @@ export default function Home() {
     }
   }, [activeSection])
 
+  // Re-highlight code when answer is shown (for practice test code blocks)
+  useEffect(() => {
+    if (showAnswer && typeof window !== 'undefined' && window.Prism) {
+      setTimeout(() => {
+        window.Prism.highlightAll()
+      }, 100)
+    }
+  }, [showAnswer])
+
   const sections = [
     { id: 'study', label: '📚 Study Guide', icon: '📚' },
     { id: 'practice', label: '🧪 Practice Tests', icon: '🧪' },
