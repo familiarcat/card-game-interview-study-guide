@@ -137,7 +137,20 @@ evaluateHand(hand) {
       ],
       correct: 3,
       explanation: "Full House (3 of a kind + 2 of a kind) beats Flush, Straight, and Three of a Kind.",
-      hint: "Remember the ranking: Royal Flush > Straight Flush > Four of a Kind > Full House > Flush > Straight > Three of a Kind > Two Pair > Pair > High Card"
+      hint: "Remember the ranking: Royal Flush > Straight Flush > Four of a Kind > Full House > Flush > Straight > Three of a Kind > Two Pair > Pair > High Card",
+      fullFunction: `// From CardGameAnalyzer.evaluateHand() - Hand ranking logic
+evaluateHand(hand) {
+  // ... validation and setup ...
+  
+  // Evaluate from highest to lowest ranking
+  if (isFlush && isStraight) return [this.HAND_RANKS.STRAIGHT_FLUSH, Math.max(...values)];
+  if (counts[0] === 4) return [this.HAND_RANKS.FOUR_OF_A_KIND, this.getValueByCount(valueCounts, 4), this.getValueByCount(valueCounts, 1)];
+  if (counts[0] === 3 && counts[1] === 2) return [this.HAND_RANKS.FULL_HOUSE, this.getValueByCount(valueCounts, 3), this.getValueByCount(valueCounts, 2)];
+  if (isFlush) return [this.HAND_RANKS.FLUSH, ...values];
+  if (isStraight) return [this.HAND_RANKS.STRAIGHT, Math.max(...values)];
+  if (counts[0] === 3) return [this.HAND_RANKS.THREE_OF_A_KIND, this.getValueByCount(valueCounts, 3), ...values.filter(v => v !== this.getValueByCount(valueCounts, 3))];
+  // ... rest of ranking logic
+}`
     },
     {
       question: "How do you check if a hand is a straight?",
@@ -149,7 +162,22 @@ evaluateHand(hand) {
       ],
       correct: 1,
       explanation: "A straight requires 5 consecutive card values (e.g., 5,6,7,8,9).",
-      hint: "A straight is about sequence, not suits. What mathematical relationship should exist between consecutive card values?"
+      hint: "A straight is about sequence, not suits. What mathematical relationship should exist between consecutive card values?",
+      fullFunction: `// From CardGameAnalyzer.isStraight() - Straight detection logic
+isStraight(values) {
+  const unique = [...new Set(values)].sort((a, b) => b - a);
+  if (unique.length !== 5) return false;
+  
+  // Check for regular straight
+  for (let i = 1; i < unique.length; i++) {
+    if (unique[i] - unique[i-1] !== 1) {
+      // Check for Ace-low straight (A,2,3,4,5)
+      if (unique.join(',') === '2,3,4,5,14') return true;
+      return false;
+    }
+  }
+  return true;
+}`
     },
     {
       question: "What's the time complexity of finding the best 5-card hand from 7 cards?",
@@ -161,7 +189,28 @@ evaluateHand(hand) {
       ],
       correct: 3,
       explanation: "We need to check all combinations of 5 cards from 7, which is C(7,5) = 21 combinations.",
-      hint: "Think about combinations - you're selecting 5 cards from 7. What's the mathematical formula for combinations?"
+      hint: "Think about combinations - you're selecting 5 cards from 7. What's the mathematical formula for combinations?",
+      fullFunction: `// From CardGameAnalyzer.findBestHand() - Combination generation and evaluation
+findBestHand(cards, handSize = 5) {
+  if (cards.length < handSize) return null;
+  
+  const combinations = this.getCombinations(cards, handSize);
+  let bestHand = null;
+  let bestScore = [-1];
+  
+  for (const combo of combinations) {
+    const score = this.evaluateHand(combo);
+    if (this.compareHands(score, bestScore) > 0) {
+      bestHand = combo;
+      bestScore = score;
+    }
+  }
+  
+  return { hand: bestHand, score: bestScore };
+}
+
+// Time complexity: O(C(n,5)) where C(n,5) = n!/(5!(n-5)!)
+// For 7 cards: C(7,5) = 21 combinations to evaluate`
     },
     {
       question: "How do you shuffle a deck of cards?",
@@ -173,7 +222,20 @@ evaluateHand(hand) {
       ],
       correct: 1,
       explanation: "Fisher-Yates shuffle provides unbiased random shuffling with O(n) complexity.",
-      hint: "You need an algorithm that ensures each permutation is equally likely. Which algorithm is the standard for unbiased shuffling?"
+      hint: "You need an algorithm that ensures each permutation is equally likely. Which algorithm is the standard for unbiased shuffling?",
+      fullFunction: `// From CardGameAnalyzer.shuffleDeck() - Fisher-Yates shuffle implementation
+shuffleDeck(deck) {
+  const shuffled = [...deck];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+// Fisher-Yates algorithm ensures each permutation is equally likely
+// Time complexity: O(n) where n is the number of cards
+// Space complexity: O(n) for the new array`
     },
     {
       question: "What's the purpose of kicker cards in poker?",
@@ -185,7 +247,25 @@ evaluateHand(hand) {
       ],
       correct: 1,
       explanation: "Kicker cards break ties when two hands have the same ranking.",
-      hint: "When two players have the same hand type (e.g., both have a pair of Aces), what determines the winner?"
+      hint: "When two players have the same hand type (e.g., both have a pair of Aces), what determines the winner?",
+      fullFunction: `// From CardGameAnalyzer.evaluateHand() - Kicker card logic in hand evaluation
+evaluateHand(hand) {
+  // ... validation and setup ...
+  
+  // Example: Pair with kickers
+  if (counts[0] === 2) {
+    const pairValue = this.getValueByCount(valueCounts, 2);
+    const kickers = values.filter(v => v !== pairValue);
+    return [this.HAND_RANKS.PAIR, pairValue, ...kickers];
+  }
+  
+  // Example: High card with kickers
+  return [this.HAND_RANKS.HIGH_CARD, ...values];
+}
+
+// Kicker cards are the remaining cards after the main hand
+// They break ties between hands of the same ranking
+// Example: Pair of Aces with K,Q kickers vs Pair of Aces with K,J kickers`
     },
     {
       question: "How do you represent a royal flush?",
@@ -197,7 +277,29 @@ evaluateHand(hand) {
       ],
       correct: 0,
       explanation: "Royal flush is A, K, Q, J, 10 of the same suit (values 14, 13, 12, 11, 10).",
-      hint: "Royal flush is the highest hand. What are the highest 5 consecutive values in poker, and what must be true about their suits?"
+      hint: "Royal flush is the highest hand. What are the highest 5 consecutive values in poker, and what must be true about their suits?",
+      fullFunction: `// From CardGameAnalyzer.evaluateHand() - Royal flush detection
+evaluateHand(hand) {
+  // ... validation and setup ...
+  
+  const isFlush = Object.keys(suitCounts).length === 1;
+  const isStraight = this.isStraight(values);
+  
+  // Royal flush: A, K, Q, J, 10 of the same suit
+  if (isFlush && isStraight) {
+    const maxValue = Math.max(...values);
+    if (maxValue === 14) { // Ace high
+      const minValue = Math.min(...values);
+      if (minValue === 10) { // Starting from 10
+        return [this.HAND_RANKS.STRAIGHT_FLUSH, maxValue]; // Royal flush
+      }
+    }
+    return [this.HAND_RANKS.STRAIGHT_FLUSH, maxValue]; // Regular straight flush
+  }
+}
+
+// Royal flush: [14, 13, 12, 11, 10] with same suit
+// Values: Ace(14), King(13), Queen(12), Jack(11), Ten(10)`
     },
     {
       question: "What's the best way to compare two poker hands?",
@@ -209,7 +311,28 @@ evaluateHand(hand) {
       ],
       correct: 2,
       explanation: "Hands are ranked by type first, then by high card, then by kickers for ties.",
-      hint: "Poker has a hierarchical ranking system. What do you compare first - the type of hand, or the individual card values?"
+      hint: "Poker has a hierarchical ranking system. What do you compare first - the type of hand, or the individual card values?",
+      fullFunction: `// From CardGameAnalyzer.compareHands() - Hand comparison logic
+compareHands(score1, score2) {
+  // First compare hand ranking (score[0])
+  if (score1[0] !== score2[0]) {
+    return score1[0] - score2[0]; // Higher ranking wins
+  }
+  
+  // Same ranking, compare high cards
+  for (let i = 1; i < Math.min(score1.length, score2.length); i++) {
+    if (score1[i] !== score2[i]) {
+      return score1[i] - score2[i]; // Higher card wins
+    }
+  }
+  
+  return 0; // Tie
+}
+
+// Comparison order:
+// 1. Hand type (Royal Flush > Straight Flush > Four of a Kind > etc.)
+// 2. High card within the hand type
+// 3. Kicker cards for breaking ties`
     },
     {
       question: "How do you handle Ace-low straight (A,2,3,4,5)?",
@@ -221,7 +344,26 @@ evaluateHand(hand) {
       ],
       correct: 2,
       explanation: "Ace-low straight (A,2,3,4,5) is valid and should be detected alongside regular straights.",
-      hint: "Ace is special - it can be both the highest card (14) and the lowest card (1). What sequence would make A,2,3,4,5 a valid straight?"
+      hint: "Ace is special - it can be both the highest card (14) and the lowest card (1). What sequence would make A,2,3,4,5 a valid straight?",
+      fullFunction: `// From CardGameAnalyzer.isStraight() - Ace-low straight handling
+isStraight(values) {
+  const unique = [...new Set(values)].sort((a, b) => b - a);
+  if (unique.length !== 5) return false;
+  
+  // Check for regular straight
+  for (let i = 1; i < unique.length; i++) {
+    if (unique[i] - unique[i-1] !== 1) {
+      // Check for Ace-low straight (A,2,3,4,5)
+      if (unique.join(',') === '2,3,4,5,14') return true;
+      return false;
+    }
+  }
+  return true;
+}
+
+// Ace-low straight: [14, 2, 3, 4, 5] where Ace(14) acts as value 1
+// Regular straight: [5, 6, 7, 8, 9] or [10, 11, 12, 13, 14]
+// Both are valid straight hands in poker`
     },
     {
       question: "What's the correct way to group cards by suit?",
@@ -233,7 +375,27 @@ evaluateHand(hand) {
       ],
       correct: 1,
       explanation: "reduce() is perfect for building an object where suits are keys and arrays of values are values.",
-      hint: "You want to create an object where each suit is a key. Which array method is designed for building a single result from an array?"
+      hint: "You want to create an object where each suit is a key. Which array method is designed for building a single result from an array?",
+      fullFunction: `// From CardGameAnalyzer.evaluateHand() - Suit grouping pattern
+evaluateHand(hand) {
+  // ... validation and setup ...
+  
+  const suits = hand.map(card => card[1]);
+  
+  // Group cards by suit using reduce()
+  const suitGroups = hand.reduce((acc, card) => {
+    const suit = card[1];
+    if (!acc[suit]) acc[suit] = [];
+    acc[suit].push(card[0]); // Add card value to suit group
+    return acc;
+  }, {});
+  
+  // Check if flush (all cards same suit)
+  const isFlush = Object.keys(suitGroups).length === 1;
+  
+  // Example result: { 'S': [14, 13], 'H': [12, 11, 10] }
+  // This shows 2 Spades and 3 Hearts
+}`
     },
     {
       question: "How do you generate all combinations of r elements from an array?",
@@ -245,7 +407,30 @@ evaluateHand(hand) {
       ],
       correct: 1,
       explanation: "Recursive approach is cleanest: for each element, combine it with all combinations of remaining elements.",
-      hint: "Think about the mathematical concept - for each element, you either include it or don't. Which programming paradigm handles this naturally?"
+      hint: "Think about the mathematical concept - for each element, you either include it or don't. Which programming paradigm handles this naturally?",
+      fullFunction: `// From CardGameAnalyzer.getCombinations() - Recursive combination generation
+getCombinations(arr, r) {
+  if (r === 1) return arr.map(item => [item]);
+  if (r === arr.length) return [arr];
+  if (r > arr.length) return [];
+  
+  const combinations = [];
+  
+  for (let i = 0; i <= arr.length - r; i++) {
+    const head = arr[i];
+    const tailCombos = this.getCombinations(arr.slice(i + 1), r - 1);
+    
+    for (const combo of tailCombos) {
+      combinations.push([head, ...combo]);
+    }
+  }
+  
+  return combinations;
+}
+
+// Example: getCombinations([1,2,3,4], 2)
+// Result: [[1,2], [1,3], [1,4], [2,3], [2,4], [3,4]]
+// Time complexity: O(C(n,r)) where C(n,r) = n!/(r!(n-r)!)`
     },
     {
       question: "What's the return format for hand evaluation?",
@@ -257,7 +442,34 @@ evaluateHand(hand) {
       ],
       correct: 2,
       explanation: "Return [handType, primaryValue, ...kickers] for easy comparison and tie-breaking.",
-      hint: "You need to compare hands easily. What data structure allows you to compare elements in order?"
+      hint: "You need to compare hands easily. What data structure allows you to compare elements in order?",
+      fullFunction: `// From CardGameAnalyzer.evaluateHand() - Return format structure
+evaluateHand(hand) {
+  // ... validation and setup ...
+  
+  // Return format: [ranking, highCard, kicker1, kicker2, ...]
+  
+  // Examples:
+  if (isFlush && isStraight) {
+    return [this.HAND_RANKS.STRAIGHT_FLUSH, Math.max(...values)];
+  }
+  
+  if (counts[0] === 4) {
+    return [this.HAND_RANKS.FOUR_OF_A_KIND, this.getValueByCount(valueCounts, 4), this.getValueByCount(valueCounts, 1)];
+  }
+  
+  if (counts[0] === 2) {
+    const pairValue = this.getValueByCount(valueCounts, 2);
+    const kickers = values.filter(v => v !== pairValue);
+    return [this.HAND_RANKS.PAIR, pairValue, ...kickers];
+  }
+  
+  return [this.HAND_RANKS.HIGH_CARD, ...values];
+}
+
+// Array format enables efficient comparison:
+// [ranking, highCard, kicker1, kicker2, ...]
+// [8, 14, 13, 12, 11, 10] = Straight Flush with Ace high`
     },
     {
       question: "How do you validate input in hand evaluation?",
@@ -269,7 +481,35 @@ evaluateHand(hand) {
       ],
       correct: 1,
       explanation: "Always validate input first: check hand length is 5, each card has [value, suit] format.",
-      hint: "Defensive programming - what should you check before processing any data? Think about the basic requirements for a poker hand."
+      hint: "Defensive programming - what should you check before processing any data? Think about the basic requirements for a poker hand.",
+      fullFunction: `// From CardGameAnalyzer.evaluateHand() - Input validation
+evaluateHand(hand) {
+  // Input validation - always check first!
+  if (!hand || hand.length !== 5) {
+    return [this.HAND_RANKS.HIGH_CARD]; // Invalid input
+  }
+  
+  // Validate each card format
+  for (const card of hand) {
+    if (!Array.isArray(card) || card.length !== 2) {
+      return [this.HAND_RANKS.HIGH_CARD]; // Invalid card format
+    }
+    
+    const [value, suit] = card;
+    if (typeof value !== 'number' || typeof suit !== 'string') {
+      return [this.HAND_RANKS.HIGH_CARD]; // Invalid card data types
+    }
+    
+    if (value < 2 || value > 14 || !['S', 'H', 'D', 'C'].includes(suit)) {
+      return [this.HAND_RANKS.HIGH_CARD]; // Invalid value or suit
+    }
+  }
+  
+  // Proceed with evaluation only after validation passes
+  const values = hand.map(card => card[0]).sort((a, b) => b - a);
+  const suits = hand.map(card => card[1]);
+  // ... rest of evaluation logic
+}`
     },
     
     // NEW: Advanced Array Manipulation Questions
