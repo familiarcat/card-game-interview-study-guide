@@ -62,6 +62,29 @@ export default function Home() {
     }
   }, [showAnswer])
 
+  // Scroll to bottom when answer is shown to reveal explanation and code snippet
+  useEffect(() => {
+    if (showAnswer && typeof window !== 'undefined') {
+      setTimeout(() => {
+        // Try to find the feedback section and scroll to it
+        const feedbackSection = document.querySelector('.feedback-content')
+        if (feedbackSection) {
+          feedbackSection.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start',
+            inline: 'nearest'
+          })
+        } else {
+          // Fallback to scrolling to bottom if feedback section not found
+          window.scrollTo({
+            top: document.documentElement.scrollHeight,
+            behavior: 'smooth'
+          })
+        }
+      }, 200) // Slightly longer delay to ensure content is rendered
+    }
+  }, [showAnswer])
+
   const sections = [
     { id: 'study', label: '📚 Study Guide', icon: '📚' },
     { id: 'practice', label: '🧪 Practice Tests', icon: '🧪' },
