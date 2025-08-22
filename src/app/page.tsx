@@ -1576,7 +1576,7 @@ isStraight(values) {
                 
                 <div className="code-block">
                   <div className="code-header">Complete Implementation</div>
-                  <pre><code className="javascript" dangerouslySetInnerHTML={{ __html: highlightCode(`// Complete Card Game Interview Solution
+                  <pre><code className="language-javascript">{`// Complete Card Game Interview Solution
 // Time target: 10 minutes from memory
 
 class CardGameAnalyzer {
@@ -1784,7 +1784,7 @@ class CardGameAnalyzer {
     const suit = cardStr.slice(-1);
     return [value, suit];
   }
-}`) }}></code></pre>
+}`}</code></pre>
                 </div>
               </div>
 
@@ -1794,7 +1794,7 @@ class CardGameAnalyzer {
                 
                 <div className="code-block">
                   <div className="code-header">Jest Test Suite</div>
-                  <pre><code className="javascript" dangerouslySetInnerHTML={{ __html: highlightCode(`// Jest Test Suite
+                  <pre><code className="language-javascript">{`// Jest Test Suite
 describe('CardGameAnalyzer', () => {
   let analyzer;
   let deck;
@@ -2003,7 +2003,7 @@ describe('CardGameAnalyzer', () => {
     const suit = cardStr.slice(-1);
     return [value, suit];
   }
-}`) }}></code></pre>
+}`}</code></pre>
                 </div>
               </div>
             </div>
