@@ -232,7 +232,12 @@ export default function Home() {
       ],
       correct: 0,
       explanation: "Sort in descending order (b-a) and take the second element [1]. This is the most readable and efficient approach.",
-      hint: "Sort the array in descending order and pick the second element."
+      hint: "Sort the array in descending order and pick the second element.",
+      fullFunction: `function findSecondHighest(hand) {
+  const values = hand.map(card => card[0]);
+  const secondHighest = values.sort((a,b) => b-a)[1];
+  return secondHighest;
+}`
     },
     {
       question: "Fill in the blank to check if all values are even: const values = [2, 4, 6, 8, 10]; const allEven = values.___(val => val % 2 === 0);",
@@ -244,7 +249,12 @@ export default function Home() {
       ],
       correct: 0,
       explanation: "every() returns true only if ALL elements pass the test. some() would return true if ANY element passes.",
-      hint: "You want to check if ALL elements meet a condition, not just some."
+      hint: "You want to check if ALL elements meet a condition, not just some.",
+      fullFunction: `function checkAllEven(hand) {
+  const values = hand.map(card => card[0]);
+  const allEven = values.every(val => val % 2 === 0);
+  return allEven;
+}`
     },
     {
       question: "Complete this code to find the most frequent value: const values = [14, 14, 13, 13, 13]; const mostFrequent = ___;",
@@ -256,7 +266,15 @@ export default function Home() {
       ],
       correct: 1,
       explanation: "Use reduce to count occurrences, then Object.entries to convert to array, sort by count, and take the first value. This is the most efficient approach.",
-      hint: "Count occurrences first, then find the one with the highest count."
+      hint: "Count occurrences first, then find the one with the highest count.",
+      fullFunction: `function findMostFrequent(hand) {
+  const values = hand.map(card => card[0]);
+  const mostFrequent = Object.entries(values.reduce((acc, val) => { 
+    acc[val] = (acc[val] || 0) + 1; 
+    return acc; 
+  }, {})).sort((a,b) => b[1] - a[1])[0][0];
+  return mostFrequent;
+}`
     },
     {
       question: "What's the missing code to check for consecutive values? const values = [10, 11, 12, 13, 14]; const isConsecutive = values.sort((a,b) => a-b).___((val, i) => i === 0 || val === values[i-1] + 1);",
@@ -268,7 +286,14 @@ export default function Home() {
       ],
       correct: 0,
       explanation: "every() checks if ALL elements pass the test. For consecutive values, each element (except first) should equal the previous + 1.",
-      hint: "You need to verify that EVERY element meets the consecutive condition."
+      hint: "You need to verify that EVERY element meets the consecutive condition.",
+      fullFunction: `function checkConsecutive(hand) {
+  const values = hand.map(card => card[0]);
+  const isConsecutive = values.sort((a,b) => a-b).every((val, i) => 
+    i === 0 || val === values[i-1] + 1
+  );
+  return isConsecutive;
+}`
     },
     {
       question: "Complete this code to find pairs: const values = [14, 14, 13, 13, 12]; const pairs = values.reduce((acc, val) => { if (values.filter(v => v === val).length === 2) acc.push(val); return acc; }, []); const uniquePairs = ___;",
@@ -280,7 +305,16 @@ export default function Home() {
       ],
       correct: 3,
       explanation: "new Set(pairs) creates a Set of unique values, then spread it back to an array. This removes duplicates efficiently.",
-      hint: "You need to remove duplicates from the pairs array."
+      hint: "You need to remove duplicates from the pairs array.",
+      fullFunction: `function findPairs(hand) {
+  const values = hand.map(card => card[0]);
+  const pairs = values.reduce((acc, val) => { 
+    if (values.filter(v => v === val).length === 2) acc.push(val); 
+    return acc; 
+  }, []);
+  const uniquePairs = [...new Set(pairs)];
+  return uniquePairs;
+}`
     },
     {
       question: "Fill in the blank to rotate array left by 1: const values = [14, 13, 12, 11, 10]; const rotated = [values[1], values[2], values[3], values[4], ___];",
@@ -292,7 +326,12 @@ export default function Home() {
       ],
       correct: 0,
       explanation: "Rotating left by 1 means the first element becomes the last. So values[0] goes at the end.",
-      hint: "In a left rotation, where does the first element end up?"
+      hint: "In a left rotation, where does the first element end up?",
+      fullFunction: `function rotateArrayLeft(hand) {
+  const values = hand.map(card => card[0]);
+  const rotated = [values[1], values[2], values[3], values[4], values[0]];
+  return rotated;
+}`
     },
     {
       question: "Complete this code to find the median value: const values = [10, 11, 12, 13, 14]; const median = values.length % 2 === 0 ? ___ : values[Math.floor(values.length/2)];",
@@ -304,7 +343,14 @@ export default function Home() {
       ],
       correct: 0,
       explanation: "For even-length arrays, median is the average of the two middle values. For odd-length, it's the middle value.",
-      hint: "When the array length is even, you need the average of two middle values."
+      hint: "When the array length is even, you need the average of two middle values.",
+      fullFunction: `function findMedian(hand) {
+  const values = hand.map(card => card[0]);
+  const median = values.length % 2 === 0 ? 
+    (values[values.length/2] + values[values.length/2 - 1]) / 2 : 
+    values[Math.floor(values.length/2)];
+  return median;
+}`
     },
     {
       question: "What's the missing code to check for three of a kind? const values = [14, 14, 14, 13, 12]; const hasThreeOfAKind = values.___(val => values.filter(v => v === val).length === 3);",
@@ -316,7 +362,12 @@ export default function Home() {
       ],
       correct: 1,
       explanation: "some() returns true if ANY element passes the test. We only need one value to appear three times.",
-      hint: "You only need to find ONE value that appears three times, not check all values."
+      hint: "You only need to find ONE value that appears three times, not check all values.",
+      fullFunction: `function checkThreeOfAKind(hand) {
+  const values = hand.map(card => card[0]);
+  const hasThreeOfAKind = values.some(val => values.filter(v => v === val).length === 3);
+  return hasThreeOfAKind;
+}`
     },
     {
       question: "Complete this code to reverse the array: const values = [14, 13, 12, 11, 10]; const reversed = values.___;",
@@ -328,7 +379,12 @@ export default function Home() {
       ],
       correct: 1,
       explanation: "slice().reverse() creates a copy first, then reverses it. reverse() mutates the original array, which is usually not desired.",
-      hint: "reverse() mutates the original array. How can you avoid that?"
+      hint: "reverse() mutates the original array. How can you avoid that?",
+      fullFunction: `function reverseArray(hand) {
+  const values = hand.map(card => card[0]);
+  const reversed = values.slice().reverse();
+  return reversed;
+}`
     },
     {
       question: "Fill in the blank to find the longest sequence of consecutive values: const values = [10, 11, 12, 15, 16, 17]; let maxLength = 1, currentLength = 1; for (let i = 1; i < values.length; i++) { if (values[i] === values[i-1] + 1) { currentLength++; maxLength = Math.max(maxLength, currentLength); } else { ___; } }",
@@ -352,7 +408,16 @@ export default function Home() {
       ],
       correct: 0,
       explanation: "A full house has exactly one value appearing twice and one value appearing three times. This checks for both conditions.",
-      hint: "A full house needs exactly one pair (2) and one three of a kind (3)."
+      hint: "A full house needs exactly one pair (2) and one three of a kind (3).",
+      fullFunction: `function checkFullHouse(hand) {
+  const values = hand.map(card => card[0]);
+  const counts = values.reduce((acc, val) => { 
+    acc[val] = (acc[val] || 0) + 1; 
+    return acc; 
+  }, {});
+  const hasFullHouse = Object.values(counts).includes(2) && Object.values(counts).includes(3);
+  return hasFullHouse;
+}`
     },
     {
       question: "What's the missing code to find the highest card not in a pair? const values = [14, 14, 13, 12, 11]; const pairValue = values.find(val => values.filter(v => v === val).length === 2); const kicker = Math.max(...values.filter(val => ___));",
@@ -388,7 +453,13 @@ export default function Home() {
       ],
       correct: 0,
       explanation: "Math.max() with spread operator is the most efficient way to find the maximum value in an array.",
-      hint: "You have an array of unique values. How do you find the maximum?"
+      hint: "You have an array of unique values. How do you find the maximum?",
+      fullFunction: `function findHighestUnique(hand) {
+  const values = hand.map(card => card[0]);
+  const uniqueValues = values.filter(val => values.filter(v => v === val).length === 1);
+  const highestUnique = Math.max(...uniqueValues);
+  return highestUnique;
+}`
     },
     {
       question: "Complete this code to check for four of a kind: const values = [14, 14, 14, 14, 13]; const hasFourOfAKind = values.___(val => values.filter(v => v === val).length === 4);",
@@ -412,7 +483,13 @@ export default function Home() {
       ],
       correct: 0,
       explanation: "In a descending sorted array, the second highest value is at index 1 (second element).",
-      hint: "If the array is sorted from highest to lowest, where is the second highest element?"
+      hint: "If the array is sorted from highest to lowest, where is the second highest element?",
+      fullFunction: `function findSecondHighestInSorted(hand) {
+  const values = hand.map(card => card[0]);
+  // Assuming values are already sorted in descending order
+  const secondHighest = values[1];
+  return secondHighest;
+}`
     },
     {
       question: "Complete this code to check for a royal flush: const suits = ['S', 'S', 'S', 'S', 'S']; const values = [10, 11, 12, 13, 14]; const isRoyalFlush = ___;",
@@ -424,7 +501,15 @@ export default function Home() {
       ],
       correct: 2,
       explanation: "Check if all suits are the same AND if the lowest value is 10 and highest is 14 (after sorting).",
-      hint: "A royal flush is a straight flush that starts at 10 and ends at 14 (Ace)."
+      hint: "A royal flush is a straight flush that starts at 10 and ends at 14 (Ace).",
+      fullFunction: `function checkRoyalFlush(hand) {
+  const suits = hand.map(card => card[1]);
+  const values = hand.map(card => card[0]);
+  const isRoyalFlush = new Set(suits).size === 1 && 
+    values.sort((a,b) => a-b)[0] === 10 && 
+    values.sort((a,b) => a-b)[4] === 14;
+  return isRoyalFlush;
+}`
     }
   ]
 
@@ -1114,6 +1199,16 @@ function isStraight(values) {
                         <p><strong>Explanation:</strong> {shuffledQuestions[currentQuestion].explanation}</p>
                         {selectedAnswer !== shuffledQuestions[currentQuestion].correct && (
                           <p><strong>Correct Answer:</strong> {String.fromCharCode(65 + shuffledQuestions[currentQuestion].correct)}. {shuffledQuestions[currentQuestion].options[shuffledQuestions[currentQuestion].correct]}</p>
+                        )}
+                        
+                        {shuffledQuestions[currentQuestion].fullFunction && (
+                          <div className="full-function-context">
+                            <h5>📋 Complete Function Context:</h5>
+                            <div className="code-block">
+                              <div className="code-header">Where this code snippet fits:</div>
+                              <pre><code className="javascript">{shuffledQuestions[currentQuestion].fullFunction}</code></pre>
+                            </div>
+                          </div>
                         )}
                       </div>
 

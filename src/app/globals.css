@@ -443,6 +443,32 @@ body {
   transform: translateY(-2px);
 }
 
+/* Full Function Context Styles */
+.full-function-context {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: var(--vs-selection-background);
+  border-radius: 6px;
+  border-left: 4px solid var(--vs-text-info);
+}
+
+.full-function-context h5 {
+  margin: 0 0 1rem 0;
+  color: var(--vs-text-info);
+  font-size: 1.1rem;
+}
+
+.full-function-context .code-block {
+  margin-top: 0.5rem;
+}
+
+.full-function-context .code-header {
+  font-size: 0.9rem;
+  color: var(--vs-text-disabled);
+  margin-bottom: 0.5rem;
+  font-style: italic;
+}
+
 .results {
   text-align: center;
   padding: 2rem;
