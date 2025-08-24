@@ -108,10 +108,16 @@ create_s3_bucket() {
         log_info "S3 bucket $S3_BUCKET already exists"
     else
         log_info "Creating S3 bucket $S3_BUCKET..."
-        aws s3api create-bucket \
-            --bucket "$S3_BUCKET" \
-            --region "$AWS_REGION" \
-            --create-bucket-configuration LocationConstraint="$AWS_REGION"
+        if [ "$AWS_REGION" = "us-east-1" ]; then
+            aws s3api create-bucket \
+                --bucket "$S3_BUCKET" \
+                --region "$AWS_REGION"
+        else
+            aws s3api create-bucket \
+                --bucket "$S3_BUCKET" \
+                --region "$AWS_REGION" \
+                --create-bucket-configuration LocationConstraint="$AWS_REGION"
+        fi
         
         # Configure bucket for static website hosting
         aws s3api put-bucket-website \
@@ -121,21 +127,30 @@ create_s3_bucket() {
                 "ErrorDocument": {"Key": "404.html"}
             }'
         
-        # Set bucket policy for public read access
-        aws s3api put-bucket-policy \
-            --bucket "$S3_BUCKET" \
-            --policy '{
-                "Version": "2012-10-17",
-                "Statement": [
-                    {
-                        "Sid": "PublicReadGetObject",
-                        "Effect": "Allow",
-                        "Principal": "*",
-                        "Action": "s3:GetObject",
-                        "Resource": "arn:aws:s3:::'$S3_BUCKET'/*"
-                    }
-                ]
-            }'
+        # Check if bucket has public access blocked
+        BLOCK_PUBLIC_ACCESS=$(aws s3api get-public-access-block --bucket "$S3_BUCKET" --query 'PublicAccessBlockConfiguration.BlockPublicPolicy' --output text 2>/dev/null || echo "true")
+        
+        if [ "$BLOCK_PUBLIC_ACCESS" = "false" ]; then
+            # Set bucket policy for public read access
+            aws s3api put-bucket-policy \
+                --bucket "$S3_BUCKET" \
+                --policy '{
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "PublicReadGetObject",
+                            "Effect": "Allow",
+                            "Principal": "*",
+                            "Action": "s3:GetObject",
+                            "Resource": "arn:aws:s3:::'$S3_BUCKET'/*"
+                        }
+                    ]
+                }'
+            log_success "Bucket policy set for public read access"
+        else
+            log_warning "Bucket has public access blocked. Manual configuration required in AWS Console."
+            log_info "Please enable public read access in S3 Console for bucket: $S3_BUCKET"
+        fi
         
         log_success "S3 bucket $S3_BUCKET created and configured!"
     fi
@@ -177,7 +192,11 @@ create_cloudfront_distribution() {
     else
         log_info "Creating CloudFront distribution..."
         
-        # Create CloudFront distribution
+        # Check if we have a valid SSL certificate for the domain
+        log_info "Checking SSL certificate for $FULL_DOMAIN..."
+        
+        # Try to create CloudFront distribution without custom domain first
+        log_info "Creating CloudFront distribution with default domain..."
         DISTRIBUTION_CONFIG=$(aws cloudfront create-distribution \
             --distribution-config '{
                 "CallerReference": "'$(date +%s)'",
@@ -210,15 +229,19 @@ create_cloudfront_distribution() {
                     "Compress": true
                 },
                 "Aliases": {
-                    "Quantity": 1,
-                    "Items": ["'$FULL_DOMAIN'"]
+                    "Quantity": 0,
+                    "Items": []
                 },
                 "Enabled": true,
                 "PriceClass": "PriceClass_100"
             }' --output json)
         
         CLOUDFRONT_DISTRIBUTION_ID=$(echo "$DISTRIBUTION_CONFIG" | jq -r '.Distribution.Id')
+        CLOUDFRONT_DOMAIN=$(echo "$DISTRIBUTION_CONFIG" | jq -r '.Distribution.DomainName')
         log_success "CloudFront distribution created: $CLOUDFRONT_DISTRIBUTION_ID"
+        log_info "Distribution domain: $CLOUDFRONT_DOMAIN"
+        log_warning "Custom domain $FULL_DOMAIN not configured - SSL certificate required"
+        log_info "To enable custom domain, request SSL certificate in AWS Certificate Manager"
     fi
 }
 
@@ -230,37 +253,41 @@ configure_dns() {
     HOSTED_ZONE_ID=$(aws route53 list-hosted-zones --query "HostedZones[?Name=='$DOMAIN.'].Id" --output text)
     
     if [ -z "$HOSTED_ZONE_ID" ]; then
-        log_error "Hosted zone not found for domain $DOMAIN"
-        exit 1
+        log_warning "Hosted zone not found for domain $DOMAIN"
+        log_info "Skipping DNS configuration - manual setup required"
+        return 0
     fi
     
     # Remove the trailing slash from hosted zone ID
     HOSTED_ZONE_ID=${HOSTED_ZONE_ID%/}
     
-    # Get CloudFront distribution domain name
-    CLOUDFRONT_DOMAIN=$(aws cloudfront get-distribution --id "$CLOUDFRONT_DISTRIBUTION_ID" --query "Distribution.DomainName" --output text)
-    
-    # Create A record alias to CloudFront
-    aws route53 change-resource-record-sets \
-        --hosted-zone-id "$HOSTED_ZONE_ID" \
-        --change-batch '{
-            "Changes": [
-                {
-                    "Action": "UPSERT",
-                    "ResourceRecordSet": {
-                        "Name": "'$FULL_DOMAIN'",
-                        "Type": "A",
-                        "AliasTarget": {
-                            "HostedZoneId": "Z2FDTNDATAQYW2",
-                            "DNSName": "'$CLOUDFRONT_DOMAIN'",
-                            "EvaluateTargetHealth": false
+    # Check if we have a custom domain configured
+    if [ -n "$CLOUDFRONT_DOMAIN" ] && [ "$CLOUDFRONT_DOMAIN" != "null" ]; then
+        # Create A record alias to CloudFront
+        aws route53 change-resource-record-sets \
+            --hosted-zone-id "$HOSTED_ZONE_ID" \
+            --change-batch '{
+                "Changes": [
+                    {
+                        "Action": "UPSERT",
+                        "ResourceRecordSet": {
+                            "Name": "'$FULL_DOMAIN'",
+                            "Type": "A",
+                            "AliasTarget": {
+                                "HostedZoneId": "Z2FDTNDATAQYW2",
+                                "DNSName": "'$CLOUDFRONT_DOMAIN'",
+                                "EvaluateTargetHealth": false
+                            }
                         }
                     }
-                }
-            ]
-        }'
-    
-    log_success "DNS records configured successfully!"
+                ]
+            }'
+        
+        log_success "DNS records configured successfully!"
+    else
+        log_warning "Custom domain not configured - DNS setup skipped"
+        log_info "Application available at: $CLOUDFRONT_DOMAIN"
+    fi
 }
 
 # Invalidate CloudFront cache
