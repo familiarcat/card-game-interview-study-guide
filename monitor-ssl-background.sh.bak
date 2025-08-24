@@ -6,7 +6,7 @@
 set -e
 
 # Configuration
-CERTIFICATE_ARN="arn:aws:acm:us-east-1:860268930466:certificate/20398ffc-b3bd-44bb-9a25-6daa64520fb0"
+CERTIFICATE_ARN="arn:aws:acm:us-east-1:860268930466:certificate/ee879a9e-6279-42c5-a8aa-eda90c5df130"
 CLOUDFRONT_DISTRIBUTION_ID="E175Q7XYH39KAQ"
 DOMAIN="study.pbradygeorgen.com"
 AWS_REGION="us-east-1"
