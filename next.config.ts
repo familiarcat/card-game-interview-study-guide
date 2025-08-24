@@ -9,6 +9,19 @@ const nextConfig: NextConfig = {
     };
     return config;
   },
+  
+  // Static export configuration
+  output: 'export',
+  trailingSlash: true,
+  images: {
+    unoptimized: true,
+  },
+  
+  // Base path for subdomain deployment
+  basePath: '',
+  
+  // Asset prefix for static files
+  assetPrefix: '',
 };
 
 export default nextConfig;

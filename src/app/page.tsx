@@ -47,7 +47,7 @@ export default function Home() {
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
     }
     setShuffledQuestions(shuffled)
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Initialize shuffled questions on component mount
   useEffect(() => {
@@ -98,14 +98,14 @@ export default function Home() {
   // Initialize live code input with starter code when challenge changes
   useEffect(() => {
     setLiveCodeInput(liveCodingChallenges[currentLiveChallenge].starterCode)
-  }, [currentLiveChallenge])
+  }, [currentLiveChallenge]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Initialize timed code input with starter code when timed challenge starts
   useEffect(() => {
     if (isTimedChallengeActive && timedQuestions[currentQuestion]) {
       setTimedCodeInput(timedQuestions[currentQuestion].code)
     }
-  }, [isTimedChallengeActive, currentQuestion])
+  }, [isTimedChallengeActive, currentQuestion]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Apply syntax highlighting to code inputs when they change
   useEffect(() => {
